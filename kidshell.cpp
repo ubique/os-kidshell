@@ -15,6 +15,8 @@ void error(std::string const& cause) {
 }
 
 // ---- enviroment variables sector
+// set var - `export VARNAME=VARVALUE`
+// view all vars - `export`
 
 static std::map<std::string, std::string> ENV;
 
