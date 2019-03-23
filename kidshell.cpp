@@ -15,8 +15,6 @@ void error(std::string const& cause) {
 }
 
 // ---- enviroment variables sector
-// set var - `export VARNAME=VARVALUE`
-// view all vars - `export`
 
 static std::map<std::string, std::string> ENV;
 
@@ -54,10 +52,7 @@ std::vector<std::string> parse_args(std::string const& command) {
       std::istream_iterator<std::string>()};
 }
 
-char* converter(std::string const& s) {
-  // OK?
-  return const_cast<char*>(s.data());
-}
+char* converter(std::string const& s) { return const_cast<char*>(s.data()); }
 
 std::vector<char*> get_ptrs(std::vector<std::string>& args) {
   std::vector<char*> result;
@@ -103,8 +98,6 @@ void run(std::string const& command) {
     prepared.push_back(nullptr);
     enviroment.push_back(nullptr);
     execute(prepared.data(), enviroment.data());
-    // is it ok that prepared and enviroment will be cleaned by other vectors?
-    // or I should copy them?
   }
 }
 
