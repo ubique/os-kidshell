@@ -42,7 +42,7 @@ void set_var(std::string const& settlement) {
       return;
     }
   }
-  error("No \'=\' in variable set");
+  std::cerr << "No \'=\' in variable set: " << settlement << std::endl;
 }
 
 // ---- arguments and executing sector
@@ -55,6 +55,7 @@ std::vector<std::string> parse_args(std::string const& command) {
 }
 
 char* converter(std::string const& s) {
+  // OK?
   return const_cast<char*>(s.data());
 }
 
@@ -93,7 +94,7 @@ void run(std::string const& command) {
     if (args.size() == 1) {
       print_vars();
     } else {
-      set_var(args[1]);
+      for (size_t i = 1; i < args.size(); i++) set_var(args[i]);
     }
   } else {
     auto vars = get_env_vars();
