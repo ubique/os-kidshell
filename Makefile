@@ -1,13 +1,16 @@
+CXX := g++
+OPTIONS := -std=c++17 -O3 -Wall -pedantic
+
 all: nsh
 
 nsh: nsh.o command.o
-	g++ -std=c++17 nsh.o command.o -o nsh
+	$(CXX) nsh.o command.o -o nsh
 
 nsh.o:
-	g++ -std=c++17 -c nsh.cpp
+	$(CXX) $(OPTIONS) -c nsh.cpp
 
 command.o:
-	g++ -std=c++17 -c command.cpp
+	$(CXX) $(OPTIONS) -c command.cpp
 
 clean:
 	rm -rf *.o nsh
