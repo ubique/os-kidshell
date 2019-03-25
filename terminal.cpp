@@ -1,12 +1,12 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <sstream>
 #include <iterator>
 #include <vector>
 #include <map>
 #include <algorithm>
 
-#include <boost/filesystem.hpp>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -57,10 +57,6 @@ std::vector<char*> parse_arguments(std::string const& command) {
     return cstring_vector(strings);
 }
 
-void print_error() {
-    std::cout << "Error occurred: " << strerror(errno) << '\n';
-}
-
 void execute_command(char* argv[], char* env[]) {
     switch (pid_t pid = fork()) {
         case -1:
@@ -68,14 +64,14 @@ void execute_command(char* argv[], char* env[]) {
             break;
         case 0:
             if (execve(argv[0], argv, env) == -1) {
-                print_error();
+                perror("Execution failed");
                 exit(-1);
             }
             exit(0);
         default:
             int result;
             if (waitpid(pid, &result, 0) == -1) {
-                print_error();             
+                perror("Waiting failed");         
             } else {
                 std::cout << "Return code: " << result << '\n';
             }
@@ -85,7 +81,7 @@ void execute_command(char* argv[], char* env[]) {
 void change_directory(const char* directory) {
     int result = chdir(directory);
     if (result != 0) {
-        print_error();
+        perror(directory);
     }
 }
 
@@ -140,7 +136,13 @@ int main(int argc, char const *argv[]) {
     }
     
     while (true) {
-        std::cout << boost::filesystem::current_path().string() << " $ ";
+        char cwd[128];
+        if (getcwd(cwd, 100) == NULL) {
+            perror("Getting current directory failed");
+            std::cout << "$ ";
+        } else {
+            printf("%s $ ", cwd);
+        }
         std::cout.flush();
         
         std::string command;
