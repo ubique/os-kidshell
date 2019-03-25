@@ -17,7 +17,7 @@ Command::~Command() {
 
 void Command::add_env(char** envp) {
     while (*envp != nullptr) {
-        char* env = new char[strlen(*envp)];
+        char* env = new char[strlen(*envp) + 1];
         strcpy(env, *envp);
         _envp.push_back(env);
         ++envp;
@@ -64,7 +64,7 @@ void Command::commit() {
 
 
 void Command::add(const std::string &arg, bool contains_eq) {
-    char *data = new char[arg.size()];
+    char *data = new char[arg.size() + 1];
     strcpy(data, arg.c_str());
     
     if (contains_eq && argc() == 0) {
