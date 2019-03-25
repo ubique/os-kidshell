@@ -46,6 +46,6 @@ When running without arguments, interactive shell is launched.
 
 You can use these arguments:
     -h, --help    Displays this help message
-    -c <command>  Runs provided command and return its exit code)";
+    -c <command>  Runs provided command and returns its exit code)";
 
 #endif
