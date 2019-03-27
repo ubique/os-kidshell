@@ -108,6 +108,13 @@ void handle_command(std::string const& command) {
                 add_environment(arguments[i]);
             }
         }
+    
+    } else if (compare_command(arguments, "unset")) {
+        if (arguments.size() != 3) {
+            std::cout << "Usage: unset [environment variable name]" << '\n';
+        } else {
+            environment.erase(arguments[1]);
+        }
         
     } else {
         char** argv = arguments.data();
