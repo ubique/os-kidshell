@@ -8,9 +8,61 @@
 #include <sys/wait.h>
 
 #include "command.hpp"
-#include "strings.hpp"
 
 const int EXIT_IGNORE = -1;
+
+void print_banner() {
+   std::cout << R"(Welcome to nsh!
+
+Type `help' to get information about the shell.)" << std::endl; 
+}
+
+void print_usage() {
+    std::cerr << "Usage: nsh [-c command | -h | --help]" << std::endl;
+}
+
+void print_help() {
+    std::cout << R"(nsh, version 1.0
+
+nsh is Not-a-SHell, simple command interpreter.
+
+SYNTAX
+
+To launch a program, just type path to it:
+    /home/user/binary
+
+To find executable in PATH, use program name instead of full path:
+    passwd
+
+To pass custom environment variables, type them before the program name:
+    PORT=4000 ./server
+
+To pass command line arguments, type them after the program name:
+    ./server --host=0.0.0.0
+
+To use space inside path, argument or environment variable, escape it with a backslash:
+    /home/user/My\ Travel\ Blog/program welcome
+
+To use backslash, type two backslashes:
+    echo \\
+
+To use character `=' in command name, escape it with a backslash:
+    DB_HOST=127.0.0.1 /home/app\=name
+
+INTERNAL COMMANDS
+
+nsh provides two commands:
+    help          Displays this help message
+    exit          Quits the shell
+
+COMMAND LINE INTERFACE
+
+When running without arguments, interactive shell is launched.
+
+You can use these arguments:
+    -h, --help    Displays this help message
+    -c <command>  Runs provided command and returns its exit code)" << std::endl;
+}
 
 void print_error(const char* reason) {
     std::cerr << "nsh: " << reason;
@@ -62,7 +114,7 @@ int process(const std::string& command_line, char** envp) {
     
     if (command.name() == "help") {
         if (command.argc() == 1) {
-            std::cout << HELP_MESSAGE << std::endl;
+            print_help();
             return EXIT_IGNORE;
         } else {
             print_error("help: invalid arguments");
@@ -82,7 +134,7 @@ int process(const std::string& command_line, char** envp) {
 }
 
 void interactive(char **envp) {
-    std::cout << WELCOME_MESSAGE << std::endl;
+    print_banner();
 
     while (true) {
         std::string command_line;
@@ -115,17 +167,19 @@ int main(int argc, char **argv, char **envp) {
         if (arg == "-c") {
             if (argc == 2) {
                 print_error("command was not specified");
-                return EXIT_FAILURE;
             } else if (argc == 3) {
                 return process(std::string(argv[2]), envp);
+            } else {
+                print_error("unknown command line arguments");
             }
         } else if (arg == "-h" || arg == "--help") {
-            std::cout << HELP_MESSAGE << std::endl;
+            print_help();
             return EXIT_SUCCESS;
+        } else {
+            print_error("unknown command line arguments");
         }
     }
 
-    print_error("unknown command line arguments");
-    std::cerr << USAGE_MESSAGE << std::endl;
+    print_usage();
     return EXIT_FAILURE;
 }
