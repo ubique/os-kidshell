@@ -31,20 +31,17 @@ SYNTAX
 To launch a program, just type path to it:
     /home/user/binary
 
-To find executable in PATH, use program name instead of full path:
-    passwd
-
 To pass custom environment variables, type them before the program name:
-    PORT=4000 ./server
+    PORT=4000 /opt/website/server
 
 To pass command line arguments, type them after the program name:
-    ./server --host=0.0.0.0
+    /opt/website/server --host=0.0.0.0
 
 To use space inside path, argument or environment variable, escape it with a backslash:
     /home/user/My\ Travel\ Blog/program welcome
 
 To use backslash, type two backslashes:
-    echo \\
+    /bin/echo \\
 
 To use character `=' in command name, escape it with a backslash:
     DB_HOST=127.0.0.1 /home/app\=name
@@ -79,7 +76,7 @@ int invoke(const Command& command) {
         print_error("cannot fork process");
         return EXIT_FAILURE;
     } else if (pid == 0) {
-        execvpe(command.name_chars(), command.argv(), command.envp());
+        execve(command.name_chars(), command.argv(), command.envp());
 
         print_error("cannot execute program");
         exit(EXIT_FAILURE);
