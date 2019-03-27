@@ -28,8 +28,11 @@ void execute(const string command) {
         c_args[i] = const_cast<char*>(args[i].data());
     }
     c_args[n] = NULL;
-    execve(c_args[0], c_args, {NULL});
-    delete[] c_args;
+    if (execve(c_args[0], c_args, {NULL}) == -1) {
+        delete[] c_args;
+        cout << "Some error occured" << endl;
+        exit(0);
+    }
 }
 
 int main() {
