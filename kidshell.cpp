@@ -36,11 +36,22 @@ void print_vars() {
 void set_var(std::string const& settlement) {
   for (size_t i = 0; i < settlement.size(); i++) {
     if (settlement[i] == '=') {
-      ENV[settlement.substr(0, i)] = settlement.substr(i + 1);
+      std::string value = settlement.substr(i + 1);
+      if ((value.front() == '\'' || value.front() == '\"') &&
+          value.back() == value.front())
+        value = value.substr(1, value.length() - 2);
+      ENV[settlement.substr(0, i)] = value;
       return;
     }
   }
   std::cerr << "No \'=\' in variable set: " << settlement << std::endl;
+}
+
+void unset_var(std::string const& var_name) {
+  auto var_it = ENV.find(var_name);
+  if (var_it != ENV.end()) {
+    ENV.erase(var_it);
+  }
 }
 
 // ---- arguments and executing sector
@@ -83,21 +94,39 @@ void execute(char* argv[], char* envp[]) {
   }
 }
 
+void pre_execute(std::vector<std::string>& args) {
+  auto vars = get_env_vars();
+  auto prepared = get_ptrs(args);
+  auto enviroment = get_ptrs(vars);
+  prepared.push_back(nullptr);
+  enviroment.push_back(nullptr);
+  execute(prepared.data(), enviroment.data());
+}
+
 void run(std::string const& command) {
   auto args = parse_args(command);
-  if (args.size() > 0 && args[0] == "export") {
-    if (args.size() == 1) {
-      print_vars();
+  if (args.size() > 0) {
+    if (args[0] == "export") {
+      if (args.size() == 1) {
+        print_vars();
+      } else {
+        for (size_t i = 1; i < args.size(); i++) {
+          set_var(args[i]);
+        }
+      }
+    } else if (args[0] == "unset") {
+      if (args.size() != 2) {
+        std::cerr << "unset command usage : unset VARNAME" << std::endl;
+      } else {
+        for (size_t i = 1; i < args.size(); i++) {
+          unset_var(args[i]);
+        }
+      }
     } else {
-      for (size_t i = 1; i < args.size(); i++) set_var(args[i]);
+      pre_execute(args);
     }
   } else {
-    auto vars = get_env_vars();
-    auto prepared = get_ptrs(args);
-    auto enviroment = get_ptrs(vars);
-    prepared.push_back(nullptr);
-    enviroment.push_back(nullptr);
-    execute(prepared.data(), enviroment.data());
+    pre_execute(args);
   }
 }
 
