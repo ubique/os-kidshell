@@ -115,8 +115,8 @@ void run(std::string const& command) {
         }
       }
     } else if (args[0] == "unset") {
-      if (args.size() != 2) {
-        std::cerr << "unset command usage : unset VARNAME" << std::endl;
+      if (args.size() < 2) {
+        std::cerr << "unset command usage : unset VARNAMES..." << std::endl;
       } else {
         for (size_t i = 1; i < args.size(); i++) {
           unset_var(args[i]);
