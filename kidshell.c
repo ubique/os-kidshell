@@ -12,6 +12,7 @@
 
 char s[MAX_LINE_LENGTH];
 char* parsed[MAX_ARGS];
+char* env[MAX_ARGS];
 
 int get_line(char *s) {
     int c = getchar();
@@ -78,8 +79,9 @@ int main() {
         if (child_pid == 0) {
             int status;
             int tries = 0;
+            env[0] = NULL;
             do {
-              status = execv(parsed[0], parsed);
+              status = execve(parsed[0], parsed, env);
               tries++;
             } while (status == -1 && errno == EAGAIN && tries <= MAX_RETRIES);
             if (status == -1)
