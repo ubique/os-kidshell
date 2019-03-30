@@ -1,18 +1,32 @@
-# Необходимо создать игрушечный интерпретатор.
+# kidshell - a simple POSIX shell
 
-## Цель - получить представление о том, как работают командные интерпретаторы.
+## Goal
+This is an educational project, aimed at understanding how to interact with
+a POSIX-compatible API to launch child processes.
 
-Программа должна в бесконечном цикле считывать с stdin полный путь к
-исполняемому файлу, который необходимо запустить и аргументы запуска.
-Дождавшись завершения процесса необходимо вывести на stdout код его завершения.
+## Features:
+* Basic executable launch and wrapping
+* Limited environment variables support
+* Built-in commands: help, export, unset, exit
 
-Необходимо использовать прямые системные вызовы для порождения новых процессов,
-запуска новых исполняемых файлов и получения статуса завершения процесса.
-Все возвращаемые значения системных вызовов должны быть проверены и в случае
-обнаружения ошибок необходимо выводить текстовое описание ошибки.
+## Building
+```
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+```
 
-На входе могут быть некорректные данные.
+Requires a C++11 compiler.
 
-Дополнительные баллы - поддержка переменных окружения.
+## Usage
+Just launch it :)
 
-Язык имплементации - C или C++.
+## Testing
+Tested by hand on Linux 4.12.
+
+## Copyright
+Ilya Bizyaev, 2019 (<me@ilyabiz.com>)
+
+Licensed under MIT terms.
+
