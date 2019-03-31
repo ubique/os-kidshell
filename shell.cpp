@@ -21,7 +21,7 @@ using std::map;
 map<string, string> env;
 
 bool check_var(const string& env) {
-    return env.find("=") != string::npos;
+    return env.length() > 1 || env.find("=") != string::npos;
 }
 
 pair<string, string> resolve_var(const string& var) {
@@ -53,13 +53,24 @@ void unset_var(const string& var) {
 
 void set_env(char* envp[]) {
     while(*envp) {
-        env.insert(resolve_var(*envp++));
+        if (check_var(*envp)) {
+            env.insert(resolve_var(*envp));
+        }
+        *envp++;
     }
 }
 
-void print_env() {
+vector<string> get_env() {
+    vector<string> res;
     for (auto&& e : env) {
-        cout << e.first << "=" << e.second << endl;
+        res.push_back(e.first + "=" + e.second);
+    }
+    return res;
+}
+
+void print_env() {
+    for (auto&& e : get_env()) {
+        cout << e << endl;
     }
 }
 
@@ -79,26 +90,25 @@ vector<string> parse(const string& command) {
     return ans;
 }
 
-void execute(const vector<string>& args) {
+char** fill_args(const vector<string>& args) {
     int n = args.size();
-    char** c_args = new char*[n + 1];
+    char** new_args = new char*[n + 1];
     for (int i = 0; i < n; ++i) {
-        c_args[i] = const_cast<char*>(args[i].data());
+        new_args[i] = const_cast<char*>(args[i].c_str());
     }
-    c_args[n] = NULL;
+    new_args[n] = NULL;
+    return new_args;
+}
 
-    int m = env.size();
-    char** env_args = new char*[m + 1];
-    env_args[m] = NULL;
-    for (auto it = env.begin(); it != env.end(); ++it) {
-        env_args[--m] = const_cast<char*>((it->first + " " + it->second).data());
-    }
-
-    if (execve(c_args[0], c_args, env_args) == -1) {
+void execute(const vector<string>& args) {
+    char** c_args = fill_args(args);
+    vector<string> temp = get_env();
+    char** e_args = fill_args(temp);
+    if (execve(c_args[0], c_args, e_args) == -1) {
         delete[] c_args;
-        delete[] env_args;
+        delete[] e_args;
         resolve_error();
-        exit(-1);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -109,23 +119,28 @@ int main(int argc, char *argv[], char *envp[]) {
         string command;
         getline(cin, command);
         if (cin.eof()) {
+            cout << "exit" << endl;
             break;
         }
         if (command.length() == 0) {
             continue;
         }
         vector<string> args = parse(command);
+        int n = args.size();
+        if (n == 1 && args[0] == "") {
+            continue;
+        }
         if (args[0] == "exit") {
             break;
         }
         if (args[0] == "unset") {
-            for (int i = 1; i < args.size(); ++i) {
+            for (int i = 1; i < n; ++i) {
                 unset_var(args[i]);
             }
         } else if (args[0] == "export") {
-            if (args.size() < 2) {
+            if (n == 1) {
                 cout << "Usage: man export" << endl;
-            } else if (args[1] == "-p") {
+            } else if (args[1] == "-p" && n == 2) {
                 print_env();
             } else {
                 for (int i = 1; i < args.size(); ++i) {
