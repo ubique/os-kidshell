@@ -1,13 +1,17 @@
 #include <iostream>
 #include <vector>
-#include <string>
+#include <cstring>
 #include <sstream>
-
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
+#include <errno.h>
 using namespace std;
+
+void resolve_error() {
+    int err = errno;
+    cout << "Error: " << strerror(err) << endl;
+}
 
 vector<string> parse(const string command) {
     vector<string> ans;
@@ -30,27 +34,32 @@ void execute(const string command) {
     c_args[n] = NULL;
     if (execve(c_args[0], c_args, {NULL}) == -1) {
         delete[] c_args;
-        cout << "Some error occured" << endl;
-        exit(0);
+        resolve_error();
+        exit(-1);
     }
 }
 
 int main() {
     while (true) {
-        cout << "[" << "greeting should be there" << "] ";
+        cout << "[" << getlogin() << "] ";
         string command;
         getline(cin, command);
         if (cin.eof() || command == "exit") {
+            cout << endl;
             break;
         }
         const pid_t pid = fork();
-
         if (pid == -1) {
             cout << "Error: cannot fork process" << endl;
         } else if (!pid) {
             execute(command);
         } else {
-            wait(NULL);
+            int wstatus;
+            if (wait(&wstatus) == -1) {
+                resolve_error();
+            } else {
+                cout << "Program exited with code " << WEXITSTATUS(wstatus) << endl;
+            }
         }
     }
 }
