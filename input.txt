@@ -1,0 +1,5 @@
+error
+/bin/ls
+/usr/bin/man execve
+exit
+/bin/ls/bin/ls
