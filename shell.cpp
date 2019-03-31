@@ -1,19 +1,26 @@
 #include <iostream>
+#include <sstream>
 #include <vector>
 #include <cstring>
-#include <sstream>
+
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
-using namespace std;
+
+using std::cout;
+using std::cin;
+using std::endl;
+using std::vector;
+using std::string;
+using std::stringstream;
 
 void resolve_error() {
     int err = errno;
     cout << "Error: " << strerror(err) << endl;
 }
 
-vector<string> parse(const string command) {
+vector<string> parse(const string& command) {
     vector<string> ans;
     stringstream ss(command);
     while (!ss.eof()) {
@@ -24,8 +31,7 @@ vector<string> parse(const string command) {
     return ans;
 }
 
-void execute(const string command) {
-    vector<string> args = parse(command);
+void execute(const vector<string>& args) {
     int n = args.size();
     char** c_args = new char*[n + 1];
     for (int i = 0; i < n; ++i) {
@@ -44,15 +50,15 @@ int main() {
         cout << "[" << getlogin() << "] ";
         string command;
         getline(cin, command);
-        if (cin.eof() || command == "exit") {
-            cout << endl;
+        vector<string> args = parse(command);
+        if (cin.eof() || args[0] == "exit") {
             break;
         }
         const pid_t pid = fork();
         if (pid == -1) {
-            cout << "Error: cannot fork process" << endl;
+            resolve_error();
         } else if (!pid) {
-            execute(command);
+            execute(args);
         } else {
             int wstatus;
             if (wait(&wstatus) == -1) {
