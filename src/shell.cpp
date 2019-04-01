@@ -121,7 +121,10 @@ void process(char *envp[])
             return;
         } else {
             int status = 0;
-            waitpid(pid, &status, 0);
+            pid_t result = waitpid(pid, &status, 0);
+            if (result == -1) {
+                std::cout << strerror(errno) << std::endl;
+            }
             std::cout << "Process finished with exitcode " << status
                       << std::endl;
         }
