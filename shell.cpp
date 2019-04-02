@@ -14,33 +14,25 @@ using std::cin;
 using std::endl;
 using std::vector;
 using std::string;
-using std::stringstream;
-using std::pair;
-using std::map;
 
-map<string, string> env;
+std::map<string, string> env;
 
-bool check_var(const string& env) {
-    return env.length() > 1 || env.find("=") != string::npos;
-}
-
-pair<string, string> resolve_var(const string& var) {
-    int i = 0;
-    while (var[i] != '=') {
-        ++i;
+std::pair<string, string> resolve_var(const string& var) {
+    size_t pos = var.find("=");
+    string value = "";
+    if (pos != string::npos) {
+        value = var.substr(pos + 1);
     }
-    return {var.substr(0, i), var.substr(i + 1)};
+    return {var.substr(0, pos), value};
 }
 
 void export_var(const string& var) {
-    if (check_var(var)) {
-        auto entry = resolve_var(var);
-        auto it = env.find(entry.first);
-        if (it != env.end()) {
-            it->second = entry.second;
-        } else {
-            env.insert(entry);
-        }
+    auto entry = resolve_var(var);
+    auto it = env.find(entry.first);
+    if (it != env.end()) {
+        it->second = entry.second;
+    } else {
+        env.insert(entry);
     }
 }
 
@@ -53,10 +45,7 @@ void unset_var(const string& var) {
 
 void set_env(char* envp[]) {
     while(*envp) {
-        if (check_var(*envp)) {
-            env.insert(resolve_var(*envp));
-        }
-        *envp++;
+        env.insert(resolve_var(*envp++));
     }
 }
 
@@ -81,7 +70,7 @@ void resolve_error() {
 
 vector<string> parse(const string& command) {
     vector<string> ans;
-    stringstream ss(command);
+    std::stringstream ss(command);
     while (!ss.eof()) {
         string temp;
         ss >> temp;
@@ -91,9 +80,9 @@ vector<string> parse(const string& command) {
 }
 
 char** fill_args(const vector<string>& args) {
-    int n = args.size();
+    size_t n = args.size();
     char** new_args = new char*[n + 1];
-    for (int i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         new_args[i] = const_cast<char*>(args[i].c_str());
     }
     new_args[n] = NULL;
@@ -105,9 +94,9 @@ void execute(const vector<string>& args) {
     vector<string> temp = get_env();
     char** e_args = fill_args(temp);
     if (execve(c_args[0], c_args, e_args) == -1) {
+        resolve_error();
         delete[] c_args;
         delete[] e_args;
-        resolve_error();
         exit(EXIT_FAILURE);
     }
 }
@@ -126,7 +115,7 @@ int main(int argc, char *argv[], char *envp[]) {
             continue;
         }
         vector<string> args = parse(command);
-        int n = args.size();
+        size_t n = args.size();
         if (n == 1 && args[0] == "") {
             continue;
         }
@@ -134,7 +123,7 @@ int main(int argc, char *argv[], char *envp[]) {
             break;
         }
         if (args[0] == "unset") {
-            for (int i = 1; i < n; ++i) {
+            for (size_t i = 1; i < n; ++i) {
                 unset_var(args[i]);
             }
         } else if (args[0] == "export") {
@@ -143,7 +132,7 @@ int main(int argc, char *argv[], char *envp[]) {
             } else if (args[1] == "-p" && n == 2) {
                 print_env();
             } else {
-                for (int i = 1; i < args.size(); ++i) {
+                for (size_t i = 1; i < args.size(); ++i) {
                     export_var(args[i]);
                 }
             }
