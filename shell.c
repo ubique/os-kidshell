@@ -25,7 +25,7 @@ size_t strlcpy(char *dst, char const *src, size_t size) {
     return src_len;
 }
 
-void prompt() {
+void prompt(void) {
     char cwd[MAX_PATH_AT_PROMPT];
     if (getcwd(cwd, sizeof(cwd)) == NULL) {
         if (errno == ERANGE) {
@@ -125,8 +125,12 @@ int main(void) {
     // init wordexp for future reuse
     wordexp("", &p, 0);
 
-    prompt();
-    while ((nread = getline(&line, &len, stdin)) != -1) {
+    while (true) {
+        prompt();
+        if ((nread = getline(&line, &len, stdin)) == -1) {
+            printf("\n"); // so that next command started on the newline
+            break;
+        }
         trim_newline(line, &nread);
         int ec = wordexp(line, &p, WRDE_REUSE | WRDE_SHOWERR | WRDE_UNDEF);
         switch (ec) {
@@ -165,7 +169,6 @@ int main(void) {
         } else {
             launch(p.we_wordv[0], p.we_wordv);
         }
-        prompt();
     }
     if (ferror(stdin)) {
         error(EXIT_FAILURE, errno, "Failed to read next line");
