@@ -14,8 +14,8 @@
 #include "programconditions.h"
 
 int execute_program(const std::string& path,
-                    const std::vector<string>& args,
-                    const std::map<string, string>& env)
+                    const std::vector<std::string>& args,
+                    const std::map<std::string, std::string>& env)
 {
     pid_t pid = fork();
     if (!pid) {

@@ -4,7 +4,6 @@
 #include <map>
 #include <string>
 #include <vector>
-using std::string;
 
 /*!
  * Manages shell environment variables
@@ -15,16 +14,16 @@ class Environment
 public:
     explicit Environment(char *envp[]);
 
-    void update_paths(const string& path_value);
-    void set_variable(const string& assignment);
-    void unset_variable(const string& var);
-    const std::map<string, string>& get_variables();
-    string find_executable(const string& filename);
+    void update_paths(const std::string& path_value);
+    void set_variable(const std::string& assignment);
+    void unset_variable(const std::string& var);
+    const std::map<std::string, std::string>& get_variables();
+    std::string find_executable(const std::string& filename);
 private:
-    bool executable_exists(const string& filename);
+    bool executable_exists(const std::string& filename);
 
-    std::map<string, string> m_environ;
-    std::vector<string> m_paths;
+    std::map<std::string, std::string> m_environ;
+    std::vector<std::string> m_paths;
 };
 
 #endif // ENVIRONMENT_H

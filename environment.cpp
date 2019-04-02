@@ -7,7 +7,7 @@
 Environment::Environment(char *envp[])
 {
     for (; *envp != nullptr; ++envp) {
-        set_variable(string(*envp));
+        set_variable(std::string(*envp));
     }
     if (m_environ.find("PATH") == m_environ.end()) {
         // Assuming default value for LSB
@@ -15,22 +15,22 @@ Environment::Environment(char *envp[])
     }
 }
 
-void Environment::update_paths(const string& path_value)
+void Environment::update_paths(const std::string& path_value)
 {
     m_paths.clear();
     std::stringstream ss(path_value);
 
-    string segment;
+    std::string segment;
     while (std::getline(ss, segment, ':'))
     {
        m_paths.push_back(segment);
     }
 }
 
-void Environment::set_variable(const string& assignment)
+void Environment::set_variable(const std::string& assignment)
 {
     size_t eq = assignment.find('=');
-    string key, value;
+    std::string key, value;
     if (eq != std::string::npos) {
         key = assignment.substr(0, eq);
         value = assignment.substr(eq + 1);
@@ -45,23 +45,23 @@ void Environment::set_variable(const string& assignment)
     }
 }
 
-void Environment::unset_variable(const string& var)
+void Environment::unset_variable(const std::string& var)
 {
     m_environ.erase(var);
 }
 
-const std::map<string, string>& Environment::get_variables()
+const std::map<std::string, std::string>& Environment::get_variables()
 {
     return m_environ;
 }
 
-string Environment::find_executable(const string& filename)
+std::string Environment::find_executable(const std::string& filename)
 {
     if (executable_exists(filename)) {
         return filename;
     }
     for (const auto& prefix : m_paths) {
-        string attempt = prefix + "/" + filename;
+        std::string attempt = prefix + "/" + filename;
         if (executable_exists(attempt)) {
             return attempt;
         }
