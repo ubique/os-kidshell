@@ -16,3 +16,21 @@
 Дополнительные баллы - поддержка переменных окружения.
 
 Язык имплементации - C или C++.
+
+### Build
+```
+$ mkdir build
+$ cd build
+$ cmake ..
+$ make
+```
+
+### Environmental variables
+`export` or `export -p` or `env` - show all environmental variables
+
+`export VAR1=VALUE1 VAR2=VALUE2 ...` - export variable (multiple variables)
+
+`unset VAR1 VAR2 ...`  - unset variable (multiple variables)
+
+
+
