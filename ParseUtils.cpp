@@ -14,7 +14,6 @@ std::vector<std::string> ParseUtils::splitString(std::string const& str) {
 std::pair<std::string, std::string> ParseUtils::parseEnvironmentalVar(std::string const& str) {
     std::string var;
     std::string value;
-    bool hadEq = false;
     if (std::count(str.begin(), str.end(), '=') > 1) {
         return std::make_pair("", "");
     }
