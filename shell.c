@@ -3,13 +3,42 @@
 #include <stdbool.h>   // true
 #include <stdio.h>     // stdin, stderr, getline
 #include <stdlib.h>    // free, setenv, unsetenv
-#include <string.h>    // strerror, strcmp, strdup, strsep
+#include <string.h>    // strerror, strcmp, strdup, strsep, strlen
 #include <sys/types.h> // pid_t
 #include <sys/wait.h>  // waitpid
-#include <unistd.h>    // fork, execve
+#include <unistd.h>    // fork, execve, getcwd
 #include <wordexp.h>   //
 
 extern char **environ;
+
+#define MAX_PATH_AT_PROMPT 256
+
+size_t strlcpy(char *dst, char const *src, size_t size) {
+    size_t src_len = strlen(src);
+    if (size != 0) {
+        while (*src != '\0' && size > 1) {
+            *dst++ = *src++;
+            --size;
+        }
+        *dst = '\0';
+    }
+    return src_len;
+}
+
+void prompt() {
+    char cwd[MAX_PATH_AT_PROMPT];
+    if (getcwd(cwd, sizeof(cwd)) == NULL) {
+        if (errno == ERANGE) {
+            strlcpy(cwd, "!Path too long to be shown!", sizeof(cwd));
+        } else {
+            error(0, errno, "Couldn't get cwd");
+            strlcpy(cwd, "!Failed to get CWD!", sizeof(cwd));
+        }
+    }
+    printf("┌[%s]\n", cwd);
+    printf("└─> ");
+    fflush(stdout);
+}
 
 void do_export(char *const argv[]) {
     for (; *argv != NULL; ++argv) {
@@ -76,6 +105,7 @@ int main(void) {
     // init wordexp for future reuse
     wordexp("", &p, 0);
 
+    prompt();
     while ((nread = getline(&line, &len, stdin)) != -1) {
         trim_newline(line, &nread);
         int ec = wordexp(line, &p, WRDE_REUSE | WRDE_SHOWERR | WRDE_UNDEF);
@@ -106,6 +136,7 @@ int main(void) {
         } else {
             launch(p.we_wordv[0], p.we_wordv);
         }
+        prompt();
     }
     if (ferror(stdin)) {
         error(EXIT_FAILURE, errno, "Failed to read next line");
