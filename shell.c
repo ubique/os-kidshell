@@ -2,7 +2,7 @@
 #include <error.h>     // error TODO gnu extension, replace with portable code
 #include <stdbool.h>   // true
 #include <stdio.h>     // stdin, stderr, getline
-#include <stdlib.h>    // free, setenv, unsetenv
+#include <stdlib.h>    // free, setenv, unsetenv, getenv
 #include <string.h>    // strerror, strcmp, strdup, strsep, strlen
 #include <sys/types.h> // pid_t
 #include <sys/wait.h>  // waitpid
@@ -62,6 +62,26 @@ void do_unset(char *const argv[]) {
         if (unsetenv(*argv) == -1) {
             error(0, errno, "Couldn't unset %s", *argv);
         }
+    }
+}
+
+void do_cd(char *const argv[]) {
+    char *dir;
+    if (*argv == NULL) {
+        dir = getenv("HOME");
+        if (!dir) {
+            error(0, 0, "HOME not set");
+            return;
+        }
+    } else {
+        dir = *argv++;
+    }
+    if (*argv != NULL) {
+        error(0, 0, "Too many arguments");
+        return;
+    }
+    if (chdir(dir) == -1) {
+        error(0, errno, "Couldn't cd to %s", dir);
     }
 }
 
@@ -133,6 +153,8 @@ int main(void) {
             do_unset(p.we_wordv + 1);
         } else if (strcmp("exit", action) == 0) {
             break;
+        } else if (strcmp("cd", action) == 0) {
+            do_cd(p.we_wordv + 1);
         } else {
             launch(p.we_wordv[0], p.we_wordv);
         }
