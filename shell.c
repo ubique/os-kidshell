@@ -94,7 +94,7 @@ void launch(char const *program, char *const argv[]) {
     if (pid == 0) {
         int ec = execve(program, argv, environ);
         if (ec == -1) {
-            error(0, errno, "Failed to exec %s", program);
+            error(EXIT_FAILURE, errno, "Failed to exec %s", program);
             return;
         }
     } else {
@@ -130,6 +130,8 @@ int main(void) {
         trim_newline(line, &nread);
         int ec = wordexp(line, &p, WRDE_REUSE | WRDE_SHOWERR | WRDE_UNDEF);
         switch (ec) {
+        case 0: // success
+            break;
         case WRDE_BADCHAR:
             error(0, 0, "Illegal occurrence of newline or one of |, &, ;, <, >, (, ), {, }.");
             continue;
@@ -142,6 +144,11 @@ int main(void) {
         case WRDE_NOSPACE:
             error(0, 0, "Out of memory");
             continue;
+        case WRDE_SYNTAX:
+            error(0, 0, "Syntax error: unbalanced parentheses, unmatched quotes etc");
+            continue;
+        default:
+            error(EXIT_FAILURE, 0, "Unexpected wordexp error code: %d", ec);
         }
         if (p.we_wordc == 0) {
             continue;
