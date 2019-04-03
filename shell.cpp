@@ -20,8 +20,8 @@ using std::endl;
 using std::vector;
 
 void greet() {
-   cout << "Kid shell created by Anton Shelepov for OS-course." << endl;
-   cout << "Type \"--help\" for more information." << endl;
+    cout << "Kid shell created by Anton Shelepov for OS-course." << endl;
+    cout << "Type \"--help\" for more information." << endl;
 }
 
 std::pair<string, string> divide_var(const char* var) {
@@ -71,7 +71,8 @@ void print_usage() {
     cout << "\t[filepath] [args..] – executes executable with given filepath and args" << endl;
     cout << "\tenv – lists current environment variables" << endl;
     cout << "\techo [var_name] – displays a single variable with given name" << endl;
-    cout << "\texport [var_name]=[var_value] – adds new variable with given name and value" << endl;
+    cout << "\texport [var_name]=[var_value] – adds new variable with given name and value";
+    cout << "Use quotations if var_value contains spaces. Note, that redundant spaces will be deleted" << endl;
     cout << "\tunset [var_name] – unsets a variable with given name" << endl;
     cout << "\texit – terminates the shell" << endl;
 }
@@ -83,25 +84,43 @@ void print_environment(unordered_map<string, string> const& environment) {
 }
 
 void print_var(unordered_map<string, string>& environment, string const& name) {
-    string value = environment[name];
 
-    if (value.empty()) {
+    if (!environment.count(name)) {
         cout << "Variable with name " + name + " wasn't set" << endl;
     } else {
-        cout << value << endl;
+        cout << environment[name] << endl;
     }
 }
 
-void export_var(unordered_map<string, string>& environment, string const& var) {
-    auto divided_var = divide_var(var.data());
-    string name = divided_var.first, value = divided_var.second;
+void export_var(unordered_map<string, string>& environment, vector<string> const& var) {
+
+    auto p = divide_var(var[1].data());
+    string name = p.first, value = p.second;
     if (name.empty()) {
-        cout << "Variable name expected" << endl;
+        cout << "Expected variable name" << endl;
         return;
     }
     if (value.empty()) {
-        cout << "Variable value expected" << endl;
+        cout << "Expected variable value name; didn't you put extra spaces before var_value?" << endl;
         return;
+    }
+    if (value[0] == '\'') {
+        value = value.substr(1, value.size() - 1);
+        for (size_t i = 2; i < var.size() && value.back() != '\''; i++) {
+            if (!value.empty()) {
+                value += " ";
+            }
+            value += var[i];
+        }
+        if (value.back() != '\'') {
+            cout << "Can't parse value name; didn't your forget quotations?" << endl;
+            return;
+        }
+
+        value.pop_back();
+        while (!value.empty() && value.back() == ' ') {
+            value.pop_back();
+        }
     }
 
     environment[name] = value;
@@ -198,7 +217,7 @@ int process_command(string const& command, unordered_map<string, string>& enviro
         if (args.size() < 2) {
             cout << "Variable name and value were expected" << endl;
         } else {
-            export_var(environment, args[1]);
+            export_var(environment, args);
         }
         return 0;
     }
@@ -236,4 +255,3 @@ int main(int argc, char* argv[], char* envp[]) {
         }
     }
 }
-
