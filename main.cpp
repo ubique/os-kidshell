@@ -39,7 +39,7 @@ void tokenize(ForwardIt const& str_begin,
     }
 }
 
-void sigterm_handler(int)
+void sigint_handler(int)
 {
     if (current_pid != 0)
     {
@@ -51,7 +51,7 @@ int main()
 {
     struct sigaction action;
     memset(&action, 0, sizeof(struct sigaction));
-    action.sa_handler = sigterm_handler;
+    action.sa_handler = sigint_handler;
 //    action.sa_flags = SA_RESTART;
     sigaction(SIGINT, &action, nullptr);
 
