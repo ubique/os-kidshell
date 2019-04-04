@@ -52,7 +52,6 @@ int main()
     struct sigaction action;
     memset(&action, 0, sizeof(struct sigaction));
     action.sa_handler = sigint_handler;
-//    action.sa_flags = SA_RESTART;
     sigaction(SIGINT, &action, nullptr);
 
     char buff[buffer_size];
@@ -92,8 +91,6 @@ int main()
         {
             return 0;
         }
-
-        extern char** environ;
 
         current_pid = fork();
         if (current_pid == 0)
