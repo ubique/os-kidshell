@@ -1,18 +1,31 @@
-# Необходимо создать игрушечный интерпретатор.
+A simple unix shell.
+Supports environment variables, double quotes and their escaping.
+To start a process with specified environment, describe it before your command.
+Quoting a string containing spaces will make it a single argument for the program.
 
-## Цель - получить представление о том, как работают командные интерпретаторы.
+Here is an example session:
 
-Программа должна в бесконечном цикле считывать с stdin полный путь к
-исполняемому файлу, который необходимо запустить и аргументы запуска.
-Дождавшись завершения процесса необходимо вывести на stdout код его завершения.
 
-Необходимо использовать прямые системные вызовы для порождения новых процессов,
-запуска новых исполняемых файлов и получения статуса завершения процесса.
-Все возвращаемые значения системных вызовов должны быть проверены и в случае
-обнаружения ошибок необходимо выводить текстовое описание ошибки.
+```
+0 -> /bin/echo A=2
+A=2
+0 -> A=2 /bin/echo
 
-На входе могут быть некорректные данные.
-
-Дополнительные баллы - поддержка переменных окружения.
-
-Язык имплементации - C или C++.
+0 -> A=2 /bin/env
+A=2
+0 -> /bin/ls
+0 -> /bin/touch "a b.txt"
+0 -> /bin/touch "a\"b.txt"
+0 -> /bin/touch "a\\b.txt"
+0 -> /bin/ls
+'a b.txt'  'a"b.txt'  'a\b.txt'
+0 -> "A=Hello, world!" /bin/env
+A=Hello, world!
+0 -> "A=Hello\"world\"" /bin/env
+A=Hello"world"
+0 -> /bin/ls "a b.txt" "a\"b.txt" "a\\b.txt"
+'a b.txt'  'a"b.txt'  'a\b.txt'
+0 -> /bin/rm "a b.txt" "a\"b.txt" "a\\b.txt"
+0 -> /bin/ls
+0 -> ^C
+```
