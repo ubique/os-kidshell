@@ -92,11 +92,13 @@ int main() {
                 else std::cout << "Exit status " << exit_status << "\n";
 
             }
-            if (WIFSIGNALED(wstatus)) {
-                std::cout << "Program was interrupted by a signal" << WTERMSIG(wstatus) << "\n";
-            }
         }
     }
+    for (size_t i = 0; i < ARGS_MAX; ++i)   {
+        delete [] args[i];
+    }
+
+    delete [] args;
 
   return 0;
 }
