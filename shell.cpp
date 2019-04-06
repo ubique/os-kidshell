@@ -151,7 +151,7 @@ int main(int i, char **argv, char **env) {
                 }
             }
         }  else if (line == ":q") {
-            printSeparator("BYE-BYE");
+            printSeparator("BYE:)");
             return 0;
         } else {
             auto tmp = getEnvp();
