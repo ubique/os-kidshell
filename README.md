@@ -1,6 +1,6 @@
 A simple unix shell.
 Supports environment variables, double quotes and their escaping.
-To start a process with specified environment, describe it before your command.
+To start a process with specified environment, either describe it before your command, or use **export** and **unset**.
 Quoting a string containing spaces will make it a single argument for the program.
 
 Here is an example session:
