@@ -80,6 +80,9 @@ void process(char *envp[])
         std::cout << "> " << std::flush;
         std::string s;
         getline(std::cin, s);
+        if (!std::cin) {
+            break;
+        }
         if (s.empty()) {
             continue;
         }
