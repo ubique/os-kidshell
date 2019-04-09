@@ -1,12 +1,12 @@
 #pragma once
-#include <vector>
-#include <iostream>
 #include <algorithm>
+#include <iostream>
 #include <memory>
+#include <vector>
 
 class Command {
 public:
-    void parse(std::string line);
+    int parse(std::string line);
     
     std::vector<std::string> getArguments();
     std::vector<std::string> getEnvironment();

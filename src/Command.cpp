@@ -1,8 +1,7 @@
-#include "Command.h"
-#include "ParserException.hpp"
-
 #include <algorithm>
 #include <memory>
+
+#include "Command.h"
 
 std::vector<std::string> Command::getArguments() {
     return args;
@@ -26,16 +25,16 @@ std::ostream& operator<<(std::ostream& os, const Command& cmd) {
     return os;
 }
 
-void Command::parse(std::string line) {
+int Command::parse(std::string line) {
     line += ' '; // Let the state machine finish
 
-    typedef enum {
+    enum state {
         STATE_START = 0,
         STATE_READING,
         STATE_READING_ESC,
         STATE_READING_QUOTE,
         STATE_READING_QUOTE_ESC
-    } state;
+    };
     
     state s = STATE_START;
     std::string cmd;
@@ -99,7 +98,8 @@ restart:
     }
 
     if (s != STATE_START || args.empty()) {
-        throw ParserException("Invalid syntax");
+        return -1;
     }
+    return 0;
 }
 

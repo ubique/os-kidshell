@@ -4,4 +4,4 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS 1) # For ccls
 
 include_directories(inc)
 
-add_executable(toy_shell src/main.cpp src/Runner.cpp src/Command.cpp)
+add_executable(toy_shell src/main.cpp src/Environment.cpp src/ExecArgumentsHolder.cpp src/Command.cpp)
