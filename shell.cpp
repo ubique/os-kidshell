@@ -19,10 +19,14 @@ void printErrorMessage(std::string const& message) {
 void printEnvironmentalVars() {
     for (auto const& x : environment) {
         std::cout << x.first
-                  << '='
-                  << x.second
-                  << std::endl;
+        << '='
+        << x.second
+        << std::endl;
     }
+}
+
+void printShell() {
+    std::cout << "Shell$ " << std::flush;
 }
 
 void setEnvironmentalVars(command& cmd) {
@@ -82,16 +86,16 @@ void execute(command& cmd) {
 
 void process() {
     std::string str;
-    while (true) {
-        std::cout << "Shell$ ";
-        std::cout.flush();
-        std::getline(std::cin, str);
+    printShell();
+    while (std::getline(std::cin, str)) {
+        
         command command = ParseUtils::splitString(str);
-
+        
         if (command.empty()) {
+            printShell();
             continue;
         }
-        if (std::cin.eof() || command[0] == "exit") {
+        if (command[0] == "exit") {
             break;
         }
         if (command[0] == "export") {
@@ -100,6 +104,7 @@ void process() {
             } else {
                 setEnvironmentalVars(command);
             }
+            printShell();
             continue;
         }
         if (command[0] == "unset") {
@@ -108,11 +113,12 @@ void process() {
             } else {
                 unsetEnvironmentalVars(command);
             }
+            printShell();
             continue;
-
+            
         }
-
         execute(command);
+        printShell();
     }
 }
 
