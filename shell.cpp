@@ -54,7 +54,7 @@ std::vector<char *> to_vector_char(std::vector<std::string> &v) {
     std::vector<char *> ret;
 
     for (auto &i : v) {
-        ret.push_back(i.data());
+        ret.push_back(&(i[0]));
     }
 
     return ret;
