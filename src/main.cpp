@@ -26,12 +26,17 @@ int main() {
 
         if (status < 0) {
             std::cerr << "Invalid syntax" << std::endl;
+            continue;
         }
 
+        int code = 0;
         try {
-            env.run(c);
+            code = env.run(c);
         } catch(const RunnerException& e) {
             std::cerr << "Could not run " << e.what() << std::endl;
+            continue;
         }
+        std::cout << "Exited with code " << code << std::endl;
+
     }
 }
