@@ -6,7 +6,15 @@
 #include <sys/wait.h>
 #include <unordered_map>
 
-const std::string HELP = "This program is needed for execute files.\nExpect arguments: <path> - path to the file and <arguments> - arguments for execute.\nType: 'exit' - for exit this program.\nType: 'help' - to see this list.\nType: 'set' <variable>=<value> (may be more than one) - for set environment variables.\nType: 'unset' <variable> (may be more than one) - for unset environment variables.\nType: 'watch-env' - for watching environment variables\n";
+const std::string HELP = R"SEQ(This program is needed for execute files.
+Expect arguments: <path> - path to the file and <arguments> - arguments for execute.
+Type: 'exit' - for exit this program.
+Type: 'help' - to see this list.
+Type: 'set' <variable>=<value> (may be more than one) - for set environment variables.
+Type: 'unset' <variable> (may be more than one) - for unset environment variables.
+Type: 'watch-env' - for watching environment variables
+)SEQ";
+
 
 std::unordered_map<std::string, std::string> env;
 
