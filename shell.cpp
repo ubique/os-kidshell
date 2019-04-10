@@ -34,7 +34,7 @@ int main() {
             size_t size = arguments.size();
             char** convertedArguments = new char* [size + 1];
             for (size_t i = 0; i < size; ++i) {
-                convertedArguments[i] = arguments[i].data();
+                convertedArguments[i] = const_cast<char*>(arguments[i].data());
             }
             convertedArguments[size] = nullptr;
             // Start execution
@@ -48,7 +48,7 @@ int main() {
         else if (pid > 0) {
             // We are parent
             if (waitpid(pid, &status, 0) == -1) {
-                std::cerr << "Failed to wait for child return" << strerror(errno) << std::endl;
+                std::cerr << "Failed to wait for child return: " << strerror(errno) << std::endl;
             } else {
                 std::cout << "Program returned with code: " << WEXITSTATUS(status) << std::endl;
             }
