@@ -1,10 +1,10 @@
 .PHONY: all clean
 
-all: shell
+all: kidshell
 
-shell: shell.c
-	cc -o shell shell.c
+shell: kidshell.h kidshell.c
+	cc -o $@ $^
 
 clean:
-	rm -rfv shell
+	rm -rfv kidshell
 
