@@ -12,7 +12,7 @@ int main() {
     std::string command;
     while (getline(std::cin, command)) {
         if (command == "exit") {
-            break;
+            exit(EXIT_SUCCESS);
         }
         // Parse command
         std::istringstream inputStream(command);
@@ -42,7 +42,7 @@ int main() {
             status = execve(convertedArguments[0], convertedArguments, env);
             if (status == -1) {
                 std::cerr << "Execution failed: " << strerror(errno) << std::endl;
-                exit(-1);
+                exit(EXIT_FAILURE);
             }
         }
         else if (pid > 0) {
