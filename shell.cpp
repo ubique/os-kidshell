@@ -11,6 +11,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
 
 using std::cout;
 using std::string;
@@ -249,6 +250,10 @@ int main(int argc, char* argv[], char* envp[]) {
 
         string command;
         getline(cin, command);
+
+        if (!cin) {
+            break;
+        }
 
         if (process_command(command, environment)) {
             break;
