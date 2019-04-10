@@ -20,9 +20,6 @@ add_executable(vshell
                include/vshell.h
                src/parser.cpp
                include/parser.h
-               src/env_wrapper.cpp
-               include/env_wrapper.h
+               src/env_storage.cpp
+               include/env_storage.h
                include/command.h)
-
-install(TARGETS vshell
-        RUNTIME DESTINATION bin)

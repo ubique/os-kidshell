@@ -5,15 +5,14 @@
 #include <set>
 
 #include "command.h"
-#include "env_wrapper.h"
+#include "env_storage.h"
 
 namespace cli
 {
 
-env_wrapper envs;
-
 std::vector<char*> get_pointers_vector(const std::vector<std::string> &v);
 void print_prompt();
+void print_error(const std::string &err, bool with_errno);
 
 bool execute_builtin(const command& cmd);
 void execute_external(const char *filename, char *const argv[], char *const env[]);

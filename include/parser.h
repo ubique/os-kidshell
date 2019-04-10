@@ -2,7 +2,6 @@
 #define H_PARSER
 
 #include <optional>
-#include <regex>
 
 #include "command.h"
 
