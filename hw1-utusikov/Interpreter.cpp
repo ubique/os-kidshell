@@ -51,9 +51,9 @@ int execute_program(std::vector<std::string> args, Enviroment enviroment) {
         std::cerr << "Cann't create a new process. \"fork\" failed." << std::endl;
     } else if (pid == 0) {
         Program program(args[0], args, enviroment.get_variables());
+        //program.print_info();
         if (execve(program.get_name(), program.get_args(), program.get_envs()) < 0) {
          std::cerr << "Executing of program was failed" << std::endl;
-         exit(EXIT_FAILURE);   
         }
     } else if (pid > 0) {
         int status = 0;
@@ -113,7 +113,7 @@ void loop (char** env) {
                 std::cerr << env.first << "=" << env.second << std::endl;
             }
         } else if (command == "run"){
-            if (args.size() == 1) {
+            if (args.size() <= 1) {
                 std::cerr << "Program must have a path." << std::endl;
                 continue;
             }
@@ -132,7 +132,8 @@ void loop (char** env) {
 
 int main(int argc, char** argv, char** env) {
     print_info();
-    (void) argv;
     loop(env);
     return 0;
 }
+
+// /home/utusi/os-kidshell/hw1-utusikov/test
