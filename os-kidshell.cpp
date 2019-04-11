@@ -24,9 +24,9 @@ std::vector<std::string> parse_command(const std::string& command) {
     return result;
 }
 
-void set_env_var(std::string_view expr) {
+void set_env_var(const std::string& expr) {
     auto eq_index = expr.find('=');
-    if (eq_index == std::string_view::npos) {
+    if (eq_index == std::string::npos) {
         std::cerr << "Usage: set KEY=VALUE [KEY=VALUE*]" << std::endl;
         return;
     }
@@ -35,7 +35,7 @@ void set_env_var(std::string_view expr) {
     memcpy(expr_ptr, expr.data(), expr.size());
     expr_ptr[expr.size()] = '\0';
 
-    std::string_view key = expr.substr(0, eq_index);
+    std::string key = expr.substr(0, eq_index);
     auto it = std::find_if(ENV.begin(), ENV.end() - 1,
             [key](const char* tmp_expr) -> bool {return memcmp(tmp_expr, key.data(), key.size()) == 0;});
 
@@ -49,7 +49,7 @@ void set_env_var(std::string_view expr) {
 
 }
 
-void unset_env_var(std::string_view var) {
+void unset_env_var(const std::string& var) {
     auto it = std::find_if(ENV.begin(), ENV.end() - 1,
             [var](const char* tmp_expr) -> bool {return memcmp(tmp_expr, var.data(), var.size()) == 0;});
 
