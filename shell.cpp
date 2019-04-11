@@ -4,7 +4,13 @@
 #include <sstream>
 #include <unistd.h>
 #include "map"
+#include <iterator>
 #include <string>
+#include <memory>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <errno.h>
 using namespace std;
 static map<string, string> envpt;
 
