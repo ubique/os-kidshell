@@ -1,7 +1,4 @@
-all: kidshell helloworld
-
-helloworld: helloWorld.cpp
-	g++ helloWorld.cpp -o helloworld 
+all: kidshell
 
 kidshell: kidshell.cpp
 	g++ kidshell.cpp -o shell
