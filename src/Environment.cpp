@@ -91,7 +91,7 @@ int Environment::run_exec(Command cmd) {
             
             std::cerr << "Could not execute: " << strerror(errno) << std::endl;
 
-            exit(1);
+            exit(EXIT_FAILURE);
             /* In the child process, no point in throwing exceptions */
             /* IRL, we should have been doing IPC here, maybe */
         }
