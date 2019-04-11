@@ -86,14 +86,16 @@ void print_vars(std::vector<std::string> &vars) {
     }
 }
 
-std::vector<char *> get_data(std::vector<std::string> &smth) {
+std::vector<char *> get_data(std::vector<std::string> &smth, const std::string &filename = "") {
     std::vector<char *> res;
+    if (!filename.empty()) {
+        res.push_back(const_cast<char *> (filename.c_str()));
+    }
     res.reserve(smth.size());
     for (auto &s : smth) {
         res.push_back(const_cast<char *> (s.c_str()));
     }
 
-    res.push_back(nullptr);
     return res;
 }
 
@@ -153,7 +155,8 @@ void run(Command &command) {
     }
 
     if (pid == 0) {
-        if (execve(command.path.c_str(), get_data(command.args).data(), get_data(vars).data()) == -1) {
+        auto path = command.path;
+        if (execve(path.c_str(), get_data(command.args, path).data(), get_data(vars).data()) == -1) {
             print_err("Cannot execute program");
             exit(EXIT_FAILURE);
         }
