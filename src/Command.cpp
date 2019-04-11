@@ -98,7 +98,7 @@ restart:
     }
 
     if (s != STATE_START || args.empty()) {
-        return -1;
+        return args.empty() ? -1 : -2;
     }
     return 0;
 }

@@ -25,7 +25,9 @@ int main() {
         int status = c.parse(line);
 
         if (status < 0) {
-            std::cerr << "Invalid syntax" << std::endl;
+            if (status != -1) {
+                std::cerr << "Invalid syntax" << std::endl;
+            }
             continue;
         }
 
