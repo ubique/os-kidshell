@@ -96,6 +96,8 @@ std::vector<char *> get_data(std::vector<std::string> &smth, const std::string &
         res.push_back(const_cast<char *> (s.c_str()));
     }
 
+    res.push_back(nullptr);
+
     return res;
 }
 
