@@ -46,6 +46,7 @@ void set_var(std::unordered_map<string, string> &map, string &var_value) {
     for (; i < var_value.size() && var_value[i] != '='; ++i);
     if (i == var_value.size() || i ==  0) {
         show_help();
+        return;
     }
     map.insert({var_value.substr(0, i), var_value.substr(i + 1, var_value.size())});
 }
@@ -77,7 +78,8 @@ int main() {
     std::unordered_map<string, string> env_vars;
     while (true) {
         std::cout << "kidshell> ";
-        std::getline(std::cin, input);
+        if (!std::getline(std::cin, input))
+            break;
         std::vector<std::string> args = split_whitespaces(input);
         if (args.empty()) continue;
         if (args[0] == "exit") {
