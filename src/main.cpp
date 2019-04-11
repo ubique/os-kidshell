@@ -12,15 +12,15 @@ int main() {
     std::string line;
 
     while(true) {
-        if (std::cin.eof()) {
-            break;
-        }
-
         Command c;
 
         std::cout << return_status << " -> " << std::flush;
 
         std::getline(std::cin, line);
+        
+        if (std::cin.eof()) {
+            break;
+        }
 
         int status = c.parse(line);
 
