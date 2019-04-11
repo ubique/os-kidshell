@@ -3,6 +3,7 @@
 #include <vector>
 #include <sstream>
 #include <unistd.h>
+#include <string.h>
 #include "map"
 #include <iterator>
 #include <string>
