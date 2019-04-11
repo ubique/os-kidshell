@@ -16,6 +16,9 @@ void printErr(const std::string& message) {
     fprintf(stderr, "ERROR %s: %s\n", message.c_str(), strerror(errno));
 }
 
+void printLogin() {
+    printf("%s:~> ", getlogin());
+}
 
 std::vector<std::string> getPATH() {
     std::vector<std::string> result;
@@ -157,17 +160,17 @@ void execute(char* argv[], char* envp[]) {
 }
 
 void run() {
-    while (true) {
-        printf("$ ");
+    printLogin();
+    std::string input;
 
-        std::string input;
-        std::getline(std::cin, input);
-
+    while (std::getline(std::cin, input)) {
         if (input.empty()) {
+            printLogin();
             continue;
         }
 
-        if (std::cin.eof() || input == "exit") {
+        if (input == "exit") {
+            printLogin();
             break;
         }
 
@@ -185,23 +188,31 @@ void run() {
                 printf("Usage: man export\n");
             }
 
-        } else if (args[0] == "unset") {
-
-            if (args.size() < 2) {
-                printf("Usage: man unset\n");
-            } else {
-                for (size_t i = 1; i < args.size(); ++i) {
-                    unsetVariable(args[i]);
-                }
-            }
+            printLogin();
 
         } else {
-            std::vector<char*> arguments = getCharVector(args);
-            std::vector<char*> envp = getCharVector(getEnvp());
 
-            execute(arguments.data(), envp.data());
+            if (args[0] == "unset") {
+
+                if (args.size() < 2) {
+                    printf("Usage: man unset\n");
+                } else {
+                    for (size_t i = 1; i < args.size(); ++i) {
+                        unsetVariable(args[i]);
+                    }
+                }
+
+                printLogin();
+
+            } else {
+                std::vector<char*> arguments = getCharVector(args);
+                std::vector<char*> envp = getCharVector(getEnvp());
+
+                execute(arguments.data(), envp.data());
+
+                printLogin();
+            }
         }
-
     }
 }
 
