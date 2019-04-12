@@ -3,7 +3,7 @@
 #include <stdbool.h>   // true
 #include <stdio.h>     // stdin, stderr, getline
 #include <stdlib.h>    // free, setenv, unsetenv, getenv
-#include <string.h>    // strerror, strcmp, strdup, strsep, strlen, strsignal
+#include <string.h>    // strerror, strcmp, strdup, strsep, strsignal
 #include <sys/types.h> // pid_t
 #include <sys/wait.h>  // waitpid
 #include <unistd.h>    // fork, execve, getcwd
@@ -13,17 +13,9 @@ extern char **environ;
 
 #define MAX_PATH_AT_PROMPT 256
 
-size_t strlcpy(char *dst, char const *src, size_t size) {
-    size_t src_len = strlen(src);
-    if (size != 0) {
-        while (*src != '\0' && size > 1) {
-            *dst++ = *src++;
-            --size;
-        }
-        *dst = '\0';
-    }
-    return src_len;
-}
+size_t strlcpy(char *dst, char const *src, size_t size);
+int setenv(const char *name, const char *value, int overwrite);
+int unsetenv(const char *name);
 
 void prompt(void) {
     char cwd[MAX_PATH_AT_PROMPT];

@@ -6,4 +6,4 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
 
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address,undefined")
 
-add_executable(shell shell.c)
+add_executable(shell utils.c shell.c)
