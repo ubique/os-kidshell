@@ -135,13 +135,14 @@ void vsh_loop()
     std::string command_line;
     for (;;)
     {
+        print_prompt();
+        std::getline(std::cin, command_line);
+
         if(std::cin.eof())
         {
             break;
         }
 
-        print_prompt();
-        std::getline(std::cin, command_line);
         const auto cmd = parse_command_line(command_line);
 
         if (cmd.has_value())
