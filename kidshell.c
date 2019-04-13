@@ -126,7 +126,7 @@ int shell_builtin_exit(char** args) {
     return 0;
 }
 
-int shell_builtin_help(char** args) {//todo
+int shell_builtin_help(char** args) {
     printf("RubyUmbra's kidshell.\n");
     printf("Type full program name and arguments then press enter.\n");
     printf("The list of builtin commands:\n");
@@ -327,7 +327,10 @@ int shell_execute(char** args) {
         perror("shell");
     } else {
         do {
-            waitpid(pid, &status, WUNTRACED);
+            if (waitpid(pid, &status, WUNTRACED) == -1) {
+                perror("shell");
+                return 1;
+            }
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
         printf("%d\n", status);
     }
