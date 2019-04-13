@@ -3,6 +3,9 @@
 #include <sstream>
 #include <vector>
 #include <cstring>
+#include <stdio.h>
+#include <errno.h>
+#include <wait.h>
 #include "Environment.h"
 
 Environment environment;
