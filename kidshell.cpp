@@ -26,7 +26,7 @@ void print_err(const std::string &message) {
 void print_help() {
     std::cout << "<path> [<arg>] - run the program on the path <path> with args [<arg>]"
               << std::endl << "env - print environment variables"
-              << std::endl << "export <variable>=<value> [<variable>=<value>] - add environment variables"
+              << std::endl << "export <variable>=<value>|<variable_without_value> [<variable>=<value>|<variable_without_value] - add environment variables"
               << std::endl << "unset <variable> [<variable>] - remove environment variables"
               << std::endl << "help - print help"
               << std::endl << "exit - close shell" << std::endl;
@@ -105,7 +105,7 @@ void run(Command &command) {
 
     if (command.path == "export") {
         if (command.args.empty()) {
-            print_err("Expects: export <variable>=<value> [<variable>=<value>]");
+            print_err("Expects: export <variable>=<value>|<variable_without_value> [<variable>=<value>|<variable_without_value]");
             return;
         }
 
@@ -118,7 +118,7 @@ void run(Command &command) {
                 }
                 env[std::string(s.begin(), m)] = val;
             } else {
-                print_err("Miss \'=\' in variable: " + s);
+                env[s] = "";
             }
         }
         return;
