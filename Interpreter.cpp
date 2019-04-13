@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <сstring>
 #include <vector>
 #include <sstream>
 
