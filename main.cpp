@@ -149,7 +149,10 @@ int exec(std::vector<std::string> args) {
         perror("kidshell@negpid");
     } else {
         do {
-            waitpid(pid, &status, WUNTRACED);
+            if(waitpid(pid, &status, WUNTRACED) == -1) {
+	        perror("kidshell@waitpid");
+	        return 1;
+	    }
         } while (WIFEXITED(status) == EXIT_SUCCESS &&
                  WIFSIGNALED(status) == EXIT_SUCCESS); // NOLINT(hicpp-signed-bitwise)
         std::cout << "status: " << status << std::endl;
