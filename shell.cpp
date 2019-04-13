@@ -23,13 +23,16 @@ std::vector<std::string> get_env_vect() {
 
 void print_error(const std::string &message) {
     std::cerr << message << strerror(errno) << std::endl;
+    std::cerr.flush();
 }
 
 std::vector<std::string> parse_args(const std::string &command) {
     std::istringstream command_stream(command);
     std::vector<std::string> result;
     std::string cur;
+    //std::cout << command << "\n";
     while (command_stream >> cur) {
+        //std::cout << cur << "\n";
         result.push_back(cur);
     }
     return result;
@@ -45,29 +48,30 @@ std::vector<char *> string_to_char(const std::vector<std::string> &args) {
 }
 
 void execute(const std::vector<std::string> &args) {
-    const int pid = fork();
+    auto args_char = string_to_char(args);
+    args_char.push_back(nullptr);
+    char **argv = args_char.data();
+    std::vector<char *> env_vector = string_to_char(get_env_vect());
+    pid_t pid = fork();
     if (pid == -1) {
         print_error("Fork failed: ");
     } else if (pid == 0) {
-        auto args_char = string_to_char(args);
-        char **argv = args_char.data();
-        std::vector<char *> env_vector = string_to_char(get_env_vect());
         if (execve(argv[0], argv, env_vector.data()) == -1) {
-            exit(EXIT_FAILURE);
+            exit(-1);
         }
         exit(EXIT_SUCCESS);
     } else {
         int status;
-        if (waitpid(pid, &status, 0) == EXIT_SUCCESS) {
-            std::cout << "Execution succeed: " << WEXITSTATUS(status) << std::endl;
-        } else {
+        pid_t wait_pid = waitpid(pid, &status, 0);
+        if (wait_pid == -1) {
             print_error("Execution failed: ");
+        } else {
+            std::cout << "Execution succeed: " << WEXITSTATUS(status) << std::endl;
         }
     }
 }
 
 void add_env(const std::string& token) {
-    //std::string name, value;
     auto eq_index = token.find('=');
     if (eq_index == std::string::npos) {
         print_error("Incorrect 'set' command: ");
@@ -94,20 +98,26 @@ void run(const std::string &command) {
         for (size_t i = 1; i < args.size(); i++) {
             erase_env(args[i]);
         }
+    } else {
+        execute(args);
     }
-    execute(args);
+}
+
+void print_greet() {
+    std::cout << "$ ";
+    std::cout.flush();
 }
 
 int main() {
+    print_greet();
     while (true) {
-        std::cout << "$";
-        std::cout.flush();
         std::string command;
         getline(std::cin, command);
-        if (command == "Exit program") {
+        if (command == "exit") {
             break;
         }
         run(command);
+        print_greet();
     }
     return 0;
 }
