@@ -113,7 +113,7 @@ void run(Command &command) {
             auto m = std::find(s.begin(), s.end(), '=');
             if (m != s.end()) {
                 std::string val = std::string(m + 1, s.end());
-                if ((val.front() == '\'' || val.front() == '\"') && val.front() == val.back()) {
+                if (!val.empty() && (val.front() == '\'' || val.front() == '\"') && val.front() == val.back()) {
                     val = val.substr(1, val.size() - 2);
                 }
                 env[std::string(s.begin(), m)] = val;
