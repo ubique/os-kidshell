@@ -44,10 +44,10 @@ To use backslash, type two backslashes:
 INTERNAL COMMANDS
 
 nsh provides four commands:
-    set name value  Set environment variable
-    unset name      Unset environment variable
-    help            Displays this help message
-    exit            Quits the shell
+    set name [value]  Set environment variable
+    unset name        Unset environment variable
+    help              Displays this help message
+    exit              Quits the shell
 
 COMMAND LINE INTERFACE
 
@@ -120,7 +120,9 @@ int process(const std::string& command_line, Env& env) {
             return EXIT_IGNORE;
         }
     } else if (command.name() == "set") {
-        if (command.argc() == 3) {
+        if (command.argc() == 2) {
+            env.set(command.argv()[1], "");
+        } else if (command.argc() == 3) {
             env.set(command.argv()[1], command.argv()[2]);
         } else {
             print_error("set: invalid arguments");
