@@ -26,7 +26,7 @@ void Environment::printEnvVars() {
 void Environment::addEnvVar(std::string& varString) {
     size_t eqSign = varString.find('=');
     if (eqSign == std::string::npos) {
-        std::cout << "Wrong format, try: \nexport [name]=[value]" << std::endl;
+        m_envVars[varString] = "";
         return;
     }
     std::string varName = varString.substr(0, eqSign);
