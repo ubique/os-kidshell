@@ -336,6 +336,7 @@ int shell_execute(char** args) {
 
 void shell_loop() {
     do {
+        if (feof(stdin)) { return; }
         printf("$ ");
     } while (shell_execute(shell_split_line_to_args(shell_read_line())));
 }
