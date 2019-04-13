@@ -14,7 +14,7 @@ static const std::string help = "Usage:"
                                 "\n\texport [NAME=VALUE ...] - associate environment variable NAME with VALUE;"
                                 "\n\tunset NAME - erase NAME from env vars;"
                                 "\n\thelp - show this message;"
-                                "\n\texp - show env vars;"
+                                "\n\tenv - show env vars;"
                                 "\n\t:q - exit program;";
 
 
@@ -37,11 +37,17 @@ void get_dir() {
 }
 
 void add_variable(std::string& env_var) {
-    unsigned long index = env_var.find('=');
-    if (index == std::string::npos) {
-        perror("export");
+    std::string::size_type index = env_var.find('=');
+    if (index != std::string::npos && index != env_var.size() - 1) {
+        environment_variables[env_var.substr(0, index)] = env_var.substr(index + 1);
+    } else {
+        std::string value;
+        if (index == env_var.size() - 1) {
+            environment_variables[env_var.substr(0, index)] = value;
+        } else {
+            environment_variables[env_var] = value;
+        }
     }
-    environment_variables[env_var.substr(0, index)] = env_var.substr(index + 1);
 }
 
 int main(int argc, char* argv[], char* envp[]) {
@@ -92,11 +98,12 @@ int main(int argc, char* argv[], char* envp[]) {
             }
             if (pid == 0) {
                 const char *filename = tokens[0].data();
-                char *args[tokens.size()];
-                for (int i = 1; i < tokens.size(); ++i) {
-                    args[i - 1] = const_cast<char *>(tokens[i].data());
+                std::vector<char *> args;
+                args.reserve(tokens.size());
+                for (auto& t : tokens) {
+                    args.push_back(&(t[0]));
                 }
-                args[tokens.size() - 1] = nullptr;
+                args.emplace_back(nullptr);
 
                 std::vector<std::string> buffer;
                 std::vector<char *> variables;
@@ -107,7 +114,7 @@ int main(int argc, char* argv[], char* envp[]) {
                 }
                 variables.push_back(nullptr);
 
-                int err = execve(filename, args, variables.data());
+                int err = execve(filename, args.data(), variables.data());
                 if (err == -1) {
                     perror("execve");
                     exit(EXIT_FAILURE);
