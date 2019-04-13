@@ -8,6 +8,7 @@
 #include <sys/wait.h>
 
 #include "command.hpp"
+#include "env.hpp"
 
 const int EXIT_IGNORE = -1;
 
@@ -22,7 +23,7 @@ void print_usage() {
 }
 
 void print_help() {
-    std::cout << R"(nsh, version 1.0
+    std::cout << R"(nsh, version 1.1
 
 nsh is Not-a-SHell, simple command interpreter.
 
@@ -31,26 +32,22 @@ SYNTAX
 To launch a program, just type path to it:
     /home/user/binary
 
-To pass custom environment variables, type them before the program name:
-    PORT=4000 /opt/website/server
-
 To pass command line arguments, type them after the program name:
     /opt/website/server --host=0.0.0.0
 
-To use space inside path, argument or environment variable, escape it with a backslash:
+To use space inside path or argument, escape it with a backslash:
     /home/user/My\ Travel\ Blog/program welcome
 
 To use backslash, type two backslashes:
     /bin/echo \\
 
-To use character `=' in command name, escape it with a backslash:
-    DB_HOST=127.0.0.1 /home/app\=name
-
 INTERNAL COMMANDS
 
-nsh provides two commands:
-    help          Displays this help message
-    exit          Quits the shell
+nsh provides four commands:
+    set name value  Set environment variable
+    unset name      Unset environment variable
+    help            Displays this help message
+    exit            Quits the shell
 
 COMMAND LINE INTERFACE
 
@@ -69,14 +66,14 @@ void print_error(const char* reason) {
     std::cerr << std::endl;
 }
 
-int invoke(const Command& command) {
+int invoke(const Command& command, const Env& env) {
     pid_t pid = fork();
 
     if (pid == -1) {
         print_error("cannot fork process");
         return EXIT_FAILURE;
     } else if (pid == 0) {
-        execve(command.name_chars(), command.argv(), command.envp());
+        execve(command.name_chars(), command.argv(), env.get_raw());
 
         print_error("cannot execute program");
         exit(EXIT_FAILURE);
@@ -100,9 +97,8 @@ int invoke(const Command& command) {
     }
 }
 
-int process(const std::string& command_line, char** envp) {
+int process(const std::string& command_line, Env& env) {
     Command command;
-    command.add_env(envp);
     command.parse(command_line);
 
     if (command.argc() == 0) {
@@ -112,11 +108,10 @@ int process(const std::string& command_line, char** envp) {
     if (command.name() == "help") {
         if (command.argc() == 1) {
             print_help();
-            return EXIT_IGNORE;
         } else {
             print_error("help: invalid arguments");
-            return EXIT_IGNORE;
         }
+        return EXIT_IGNORE;
     } else if (command.name() == "exit") {
         if (command.argc() == 1) {
             exit(EXIT_SUCCESS);
@@ -124,13 +119,27 @@ int process(const std::string& command_line, char** envp) {
             print_error("exit: invalid arguments");
             return EXIT_IGNORE;
         }
+    } else if (command.name() == "set") {
+        if (command.argc() == 3) {
+            env.set(command.argv()[1], command.argv()[2]);
+        } else {
+            print_error("set: invalid arguments");
+        }
+        return EXIT_IGNORE;
+    } else if (command.name() == "unset") {
+        if (command.argc() == 2) {
+            env.unset(command.argv()[1]);
+        } else {
+            print_error("unset: invalid arguments");
+        }
+        return EXIT_IGNORE;
     } else {
         command.commit();
-        return invoke(command);
+        return invoke(command, env);
     }
 }
 
-void interactive(char **envp) {
+void interactive(Env& env) {
     print_banner();
 
     while (true) {
@@ -138,7 +147,7 @@ void interactive(char **envp) {
 
         std::cout << "> " << std::flush;
         if (std::getline(std::cin, command_line)) {
-            int exit_code = process(command_line, envp);
+            int exit_code = process(command_line, env);
             if (exit_code != EXIT_IGNORE) {
                 std::cout << "[" << exit_code << "] ";
             }
@@ -156,8 +165,9 @@ void interactive(char **envp) {
 }
 
 int main(int argc, char **argv, char **envp) {
+    Env env(envp);
     if (argc <= 1) {
-        interactive(envp);
+        interactive(env);
         return EXIT_SUCCESS;
     } else {
         std::string arg = argv[1];
@@ -165,7 +175,7 @@ int main(int argc, char **argv, char **envp) {
             if (argc == 2) {
                 print_error("command was not specified");
             } else if (argc == 3) {
-                return process(std::string(argv[2]), envp);
+                return process(std::string(argv[2]), env);
             } else {
                 print_error("unknown command line arguments");
             }

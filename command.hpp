@@ -6,16 +6,15 @@
 
 class Command {
 private:
-    std::vector<char*> _argv, _envp;
+    std::vector<char*> _argv;
     
-    void add(const std::string&, bool contains_eq);
+    void add(const std::string&);
 public:
     Command();
     ~Command();
 
-    void add_env(char**);
     void parse(const std::string&);
-
+    
     void commit();
 
     size_t argc() const;
@@ -24,7 +23,6 @@ public:
     const std::string name() const;    
     
     char* const* argv() const;
-    char* const* envp() const;
 };
 
 #endif
