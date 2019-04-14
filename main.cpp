@@ -47,6 +47,13 @@ std::vector<char *> getCharEnvironment() {
     return vectorStringToChar(env);
 }
 
+void removeEnvironment(std::string k) {
+    auto i = environment.find(k);
+    if (i != environment.end()) {
+        environment.erase(i);
+    }
+}
+
 void showEnvironment() {
     std::vector<std::string> env = getEnvironment();
     for (const std::string &s : env) {
@@ -58,7 +65,11 @@ void addEnvironment(char *env) {
     std::string en(env);
     size_t ind = en.find('=');
     if (ind != std::string::npos) {
-        environment[en.substr(0, ind)] = en.substr(ind + 1, en.length());
+        if (ind == en.length() - 1) {
+            environment[en.substr(0, ind)] = "";
+        } else {
+            environment[en.substr(0, ind)] = en.substr(ind + 1, en.length());
+        }
     } else {
         printColorText(RED, "Error: couldn't add new environment: not found '=' in");
         printf("%s\n", env);
@@ -150,6 +161,13 @@ void callCommand(std::string &command) {
             printColorText(RED, "Error: command export need 0 or 1 argument:");
             printf(" 'export' or 'export [var]=[val]'\n");
         }
+    } else if (compareStringAndChar(args, "unset")) {
+        if (args.size() != 2) {
+            printColorText(RED, "Error: command unset need 1 argument:");
+            printf(" 'unset [var]'\n");
+            return;
+        }
+        removeEnvironment(args[1]);
     } else {
         auto env = getCharEnvironment();
 
