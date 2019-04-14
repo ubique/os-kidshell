@@ -19,7 +19,7 @@ int main(int argc, char** argv, char** envp)
     {
         printf("shell:~$ ");
         std::getline(std::cin, input);
-        if (input == "exit")
+        if (input == "exit" || std::cin.eof())
         {
             return 0;
         }
