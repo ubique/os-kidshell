@@ -108,7 +108,7 @@ int main() {
         std::cout.flush();
         std::string command;
         getline(std::cin, command);
-        if (command == "exit") {
+        if (command == "exit" || std::cin.eof()) {
             break;
         }
         run(command);
