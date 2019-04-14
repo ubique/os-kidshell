@@ -3,6 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <string>
+#include <cstring>
 #include <sys/wait.h>
 
 static const size_t ARGS_MAX = 32, FILE_NAME_MAX = 256;
@@ -51,11 +52,6 @@ void init_args(const std::string &path, const std::string &args_string, char *ar
     parse_args(args_string, args);
 }
 
-void clean(char **args, char **envp) {
-    delete[] args;
-    delete[] envp;
-}
-
 int main() {
   std::string path, args_string;
 
@@ -68,36 +64,41 @@ int main() {
 
     while (true) {
         print_current_path();
+
         if (!(std::cin >> path))
             break;
+        if (path.empty()) continue;
         getline(std::cin, args_string);
+
         init_args(path, args_string, args);
 
         pid_t pid = fork();
+
         if (pid == 0) {
             int program_status = execve(path.data(), args, envp);
-            if (program_status < 0) {
-                std::cout << "Can not execute " << path << "...\n";
-            }
-            return 0;
-        } else if (pid == -1)  {
-            std::cout << "Something bad happened during fork()...";
+            std::cerr << "Can't execute " << path << ": " <<  strerror(errno) << "\n";
+            return program_status;
+        } else if (pid == -1) {
+            std::cerr << "Can't fork: " <<  strerror(errno) << "\n";
         } else {
             int wstatus;
-            waitpid(pid, &wstatus, WUNTRACED);
-
-            if (WIFEXITED(wstatus)) {
-                int exit_status = WEXITSTATUS(wstatus);
-                if (exit_status) std::cout << "Finished correclty with status " << exit_status << "\n";
-                else std::cout << "Exit status " << exit_status << "\n";
-
-            }
+            if (waitpid(pid, &wstatus, WUNTRACED) == -1) {
+                std::cerr << "Error occured in child process: " << strerror(errno) << "\n";
+            } else {
+                if (WIFEXITED(wstatus)) {
+                    int exit_status = WEXITSTATUS(wstatus);
+                    std::cout << path << " execution exited with code " << exit_status << "\n";
+                } else {
+                    std::cerr << path << " execution didn't finish correctly.\n";
+                }
+            };
         }
     }
-    for (size_t i = 0; i < ARGS_MAX; ++i)   {
-        delete [] args[i];
-    }
 
+    for (size_t i = 0; i < ARGS_MAX; ++i)   {
+        if (args[i] != nullptr)
+            delete [] args[i];
+    }
     delete [] args;
 
   return 0;
