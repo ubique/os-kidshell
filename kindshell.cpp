@@ -65,7 +65,7 @@ void executeCommand(vector<string> &tokens) {
             }
             variables[environmentVariables.size()] = nullptr;
 
-            int executeResult = execvpe(args[0], args, variables);
+            int executeResult = execve(args[0], args, variables);
             if (executeResult == -1) {
                 printErrorMessage("Error occurred while executing process given");
                 exit(EXIT_FAILURE);
@@ -89,10 +89,10 @@ int main(int argc, char *argv[]) {
     cout << welcomeMessage;
     string command;
 
-    while (true) {
+    cout << ">> ";
+
+    while (getline(cin, command)) {
         cout.flush();
-        cout << ">> ";
-        getline(cin, command);
 
         vector<string> lineTokens = getTokens(command);
 
@@ -130,6 +130,7 @@ int main(int argc, char *argv[]) {
         }
 
         executeCommand(lineTokens);
+
+        cout << ">> ";
     }
 }
-
