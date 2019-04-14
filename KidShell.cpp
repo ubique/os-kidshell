@@ -7,7 +7,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-int main()
+int main(int argc, char *argv[], char *envp[])
 {
   while(true)
   {
@@ -44,7 +44,7 @@ int main()
     {
       std::cout << "Error on creating the child process\n";
     } else if (process == 0) {
-      if (execv(correctArgs[0], correctArgs) == -1)
+      if (execve(correctArgs[0], correctArgs, envp) == -1)
       {
         std::cout << "Error occurred during the program execution\n";
         exit(-1);
