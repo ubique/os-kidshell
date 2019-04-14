@@ -22,7 +22,8 @@ std::vector<std::string> get_env_vect() {
 }
 
 void print_error(const std::string &message) {
-    std::cerr << message << strerror(errno) << std::endl;
+    if (errno != 0) std::cerr << message << strerror(errno) << std::endl;
+    else std::cerr << message << std::endl;
     std::cerr.flush();
 }
 
@@ -48,25 +49,22 @@ std::vector<char *> string_to_char(const std::vector<std::string> &args) {
 void execute(const std::vector<std::string> &args) {
     auto args_char = string_to_char(args);
     args_char.push_back(nullptr);
-    char **argv = args_char.data();
     std::vector<char *> env_vector = string_to_char(get_env_vect());
     env_vector.push_back(nullptr);
-    char** envv = env_vector.data();
     pid_t pid = fork();
     if (pid == -1) {
         print_error("Fork failed: ");
     } else if (pid == 0) {
-        if (execve(argv[0], argv, envv) == -1) {
-            exit(-1);
+        if (execve(args_char[0], args_char.data(), env_vector.data()) == -1) {
+            exit(EXIT_FAILURE);
         }
         exit(EXIT_SUCCESS);
     } else {
         int status;
-        pid_t wait_pid = waitpid(pid, &status, 0);
-        if (wait_pid == -1) {
+        if (waitpid(pid, &status, 0) == -1){
             print_error("Execution failed: ");
         } else {
-            std::cout << "Execution returns code: " << WEXITSTATUS(status) << std::endl;
+            std::cout << "Execution return code: " << WEXITSTATUS(status) << std::endl;
         }
     }
 }
@@ -74,7 +72,7 @@ void execute(const std::vector<std::string> &args) {
 void add_env(const std::string &token) {
     auto eq_index = token.find('=');
     if (eq_index == std::string::npos) {
-        print_error("Incorrect 'set' command: ");
+        print_error("Incorrect 'set' command");
         return;
     }
     std::string name = token.substr(0, eq_index);
@@ -104,21 +102,16 @@ void run(const std::string &command) {
     }
 }
 
-void print_greet() {
-    std::cout << "$ ";
-    std::cout.flush();
-}
-
 int main() {
-    print_greet();
     while (true) {
+        std::cout << "$ ";
+        std::cout.flush();
         std::string command;
         getline(std::cin, command);
         if (command == "exit") {
             break;
         }
         run(command);
-        print_greet();
     }
     return 0;
 }
