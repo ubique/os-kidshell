@@ -134,7 +134,7 @@ int main(int argc, char const *argv[]) {
         }
         std::string command;
         std::getline(std::cin, command);
-        if (command == "exit") {
+        if (std::cin.eof()||command == "exit") {
             std::cout << "bye" << "\n";
             break;
         }
