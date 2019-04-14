@@ -22,9 +22,10 @@ int main(int argc, char *argv[], char *envp[]) {
 
     init_messages();
 
-    while (true) {
-        printf(">> ");
-        fgets(command, sizeof(command), stdin);
+
+    printf(">> ");
+
+    while (fgets(command, sizeof(command), stdin)) {
 
         /* exit command */
         if (!strcmp(command, "exit\n"))
@@ -42,7 +43,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
         case 0:
             /* Child */
-            (void)execvpe(p.we_wordv[0], p.we_wordv, envp);
+            (void)execve(p.we_wordv[0], p.we_wordv, envp);
             printf("Error on program start\n");
             exit(EXIT_FAILURE);
             break;
@@ -75,6 +76,7 @@ int main(int argc, char *argv[], char *envp[]) {
             break;
             /* End parent */
         }
+        printf(">> ");
     }
 
     return EXIT_SUCCESS;
