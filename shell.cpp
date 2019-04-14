@@ -30,9 +30,7 @@ std::vector<std::string> parse_args(const std::string &command) {
     std::istringstream command_stream(command);
     std::vector<std::string> result;
     std::string cur;
-    //std::cout << command << "\n";
     while (command_stream >> cur) {
-        //std::cout << cur << "\n";
         result.push_back(cur);
     }
     return result;
@@ -52,11 +50,13 @@ void execute(const std::vector<std::string> &args) {
     args_char.push_back(nullptr);
     char **argv = args_char.data();
     std::vector<char *> env_vector = string_to_char(get_env_vect());
+    env_vector.push_back(nullptr);
+    char** envv = env_vector.data();
     pid_t pid = fork();
     if (pid == -1) {
         print_error("Fork failed: ");
     } else if (pid == 0) {
-        if (execve(argv[0], argv, env_vector.data()) == -1) {
+        if (execve(argv[0], argv, envv) == -1) {
             exit(-1);
         }
         exit(EXIT_SUCCESS);
@@ -66,22 +66,23 @@ void execute(const std::vector<std::string> &args) {
         if (wait_pid == -1) {
             print_error("Execution failed: ");
         } else {
-            std::cout << "Execution succeed: " << WEXITSTATUS(status) << std::endl;
+            std::cout << "Execution returns code: " << WEXITSTATUS(status) << std::endl;
         }
     }
 }
 
-void add_env(const std::string& token) {
+void add_env(const std::string &token) {
     auto eq_index = token.find('=');
     if (eq_index == std::string::npos) {
         print_error("Incorrect 'set' command: ");
+        return;
     }
     std::string name = token.substr(0, eq_index);
     std::string value = token.substr(eq_index + 1);
     env[name] = value;
 }
 
-void erase_env(const std::string& token) {
+void erase_env(const std::string &token) {
     if (env.count(token)) {
         env.erase(token);
     }
