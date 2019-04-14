@@ -141,6 +141,9 @@ void parseShellCommand(const std::string& s) {
 				case 1:
 					showEnvVars();
 					break;
+				case 2:
+					env_vars[tokens[1]] = "";
+					break;
 				case 3:
 					env_vars[tokens[1]] = tokens[2];
 					break;
