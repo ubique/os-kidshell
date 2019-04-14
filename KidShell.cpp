@@ -15,8 +15,6 @@
 
 KidShell::KidShell(char *envp[]) : env(envp) {}
 
-KidShell::KidShell() = default;
-
 void KidShell::run() {
     std::string line;
 
@@ -78,17 +76,17 @@ void KidShell::handleExport(std::vector<std::string> &args) {
         return;
     }
     if (args[1] == "--help") {
-        std::cout << "export: export [name=value] ...] [-v [key ...]]\n"
+        std::cout << "export: export [name[=value]] ...] [-v [key ...]]\n"
                      "    Set shell variables.\n"
                      "    If no arguments is provided, prints environment variables.\n"
                      "    Options:\n"
-                     "      -v        for each KEY print key=value pair if variable with the key exists\n" << std::endl;
+                     "      -v          for each KEY print value if variable with the key exists\n" << std::endl;
         return;
     }
     for (size_t i = 1; i < args.size(); i++) {
         if (args[i] == "-v") {
             for (size_t j = i + 1; j < args.size(); j++) {
-                env.printVariableByKey(args[j]);
+                env.printValueByKey(args[j]);
             }
             return;
         }
@@ -225,9 +223,3 @@ std::vector<std::vector<std::string>> KidShell::getPipedArgs(std::string line) {
     args.push_back(getArgs(line));
     return args;
 }
-
-
-
-
-
-

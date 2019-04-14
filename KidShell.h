@@ -9,9 +9,9 @@
 
 class KidShell {
 public:
-    KidShell();
+    KidShell() = default;
 
-    KidShell(char * envp[]);
+    explicit KidShell(char * envp[]);
 
     void run();
 
@@ -37,6 +37,7 @@ private:
     void handleExport(std::vector<std::string> &args);
 
     void handleUnset(std::vector<std::string> &args);
+
 
     EnvironmentManager env;
 };

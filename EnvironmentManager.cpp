@@ -28,11 +28,11 @@ std::string EnvironmentManager::getExecutable(std::string const& filepath) {
 }
 
 void EnvironmentManager::exportVariable(std::string const &var) {
+    std::pair<std::string, std::string> keyValue;
     size_t index = var.find('=');
-    if (index == std::string::npos) {
-        return;
-    }
-    std::pair<std::string, std::string> keyValue({var.substr(0, index), var.substr(index + 1)});
+    keyValue = (index == std::string::npos) ? std::make_pair(var, "") :
+               std::make_pair(var.substr(0, index), var.substr(index + 1));
+
     vars.insert_or_assign(keyValue.first, keyValue.second);
     varsString.insert_or_assign(keyValue.first, var);
     if (keyValue.first == "PATH") {
@@ -51,12 +51,12 @@ void EnvironmentManager::printVariables() {
     }
 }
 
-void EnvironmentManager::printVariableByKey(std::string const& key) {
+void EnvironmentManager::printValueByKey(std::string const &key) {
     auto entry = vars.find(key);
     if (entry == vars.end()) {
         return;
     }
-    printEntry(entry);
+    std::cout << entry->second << std::endl;
 }
 
 std::unique_ptr<char * const[]>  EnvironmentManager::getVariablesArray() {
@@ -82,12 +82,4 @@ void EnvironmentManager::setPaths(std::string const& line) {
     while (std::getline(stream, path, ':')) {
         paths.push_back(path);
     }
-}
-
-void EnvironmentManager::printEntry(std::unordered_map<std::string, std::string>::iterator it) {
-    std::cout << entryToString(it) << std::endl;
-}
-
-std::string EnvironmentManager::entryToString(std::unordered_map<std::string, std::string>::iterator it) {
-    return it->first + '=' + it->second;
 }

@@ -23,7 +23,7 @@ public:
 
     void printVariables();
 
-    void printVariableByKey(std::string const& key);
+    void printValueByKey(std::string const &key);
 
     std::unique_ptr<char * const[]>  getVariablesArray();
 
