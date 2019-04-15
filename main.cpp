@@ -7,6 +7,8 @@
 #include <iterator>
 #include <wait.h>
 
+// Created by Artem Ustinov at 15.04.2019
+
 struct command {
     std::string path;
     std::vector<char *> argv;
@@ -18,6 +20,8 @@ struct command {
         }
         argv.back() = nullptr;
     }
+
+    command() = default;
 };
 
 
@@ -57,7 +61,7 @@ void run(command const &cmd) {
     }
 }
 
-int main() {
+int main(int argc, char *argv[], char *envp[]) {
     while (true) {
         std::string s;
         getline(std::cin, s);
