@@ -57,7 +57,7 @@ int main() {
             delete[] data.second;
         } else if (pid) {
             int status;
-            waitpid(-1, &status, 0);
+            waitpid(pid, &status, 0);
             if (WIFEXITED(status)) {
                 if (WEXITSTATUS(status) != 125) {
                     response = "Call " + query + " performed:\n" + "Exit code is " + to_string(WEXITSTATUS(status));
