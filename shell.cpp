@@ -1,21 +1,26 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+
 #include <vector>
 #include <unordered_map>
 #include <functional>
 #include <algorithm>
 
-std::string USAGE_SEP = " \n\t - ";
+#include <unistd.h>
+#include <sys/wait.h>
+#include <cstring>
+
+std::string USAGE_SEP = "\n\t";
 std::vector<std::pair<std::string, std::string>> USAGE{
-    {"PATH [ARG]*", "run program on PATH with specified arguments"},
+    {"PATH [ARG]*", "- run program on PATH with specified arguments"},
 
-    {"set KEY=VALUE [KEY=VALUE]*", "set environment variables"},
-    {"unset KEY [KEY]*", "unset environment variables"},
-    {"list", "list all environment variables"},
+    {"set KEY=VALUE [KEY=VALUE]*", "- set environment variables"},
+    {"unset KEY [KEY]*", "- unset environment variables"},
+    {"list", "- list all environment variables"},
 
-    {"help", "show this help message"},
-    {"exit", "exit shell"}
+    {"help", "- show this help message"},
+    {"exit", "- exit shell"}
 };
 
 class environment {
@@ -45,10 +50,20 @@ public:
         }
     }
 
+    std::vector<std::string> get_all() {
+        std::vector<std::string> all(_variables.size());
+        std::transform(_variables.begin(), _variables.end(), all.begin(),
+                       [](std::pair<std::string, std::string> const &var) {
+                           return var.first + "=" + var.second;
+                       });
+        return all;
+    }
+
     void list(std::ostream &out) {
-        out << "=== ENVIRONMENT ===\n";
+        out << "environment:\n";
+        int index = 1;
         for (auto const &var : _variables) {
-            out << "\t" << var.first << " = " << var.second << '\n';
+            out << "[" << index++ << "]\t" << var.first << "=" << var.second << std::endl;
         }
     }
 
@@ -81,6 +96,11 @@ namespace parser {
         }
 
         std::string name = arg.substr(0, index);
+        if (std::any_of(name.begin(), name.end(), [](char c) {
+            return !(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z');
+        })) {
+            throw parsing_exception("Environment variables should consist only of latin letters");
+        }
         std::string value = arg.substr(index + 1);
         return {name, value};
     }
@@ -89,7 +109,10 @@ namespace parser {
 
 namespace runtime {
 
-    std::string PREFIX = "my@shell:";
+    std::string _ERROR = "\033[31m";
+    std::string _DEFAULT = "\033[0m";
+
+    std::string PREFIX = "shell@";
     bool RUNNING = true;
     environment ENV;
 
@@ -98,6 +121,27 @@ namespace runtime {
         runtime_exception(std::string const &message) : runtime_error(message) {};
 
     };
+
+    std::vector<char *> convert_to_cstring(std::vector<std::string> const &args) {
+        std::vector<char *> cargs;
+        std::for_each(args.begin(), args.end(), [&cargs](std::string const &arg) {
+            return cargs.push_back(const_cast<char *>(arg.c_str()));
+        });
+        cargs.push_back(nullptr);
+        return cargs;
+    }
+
+    void report(std::string const &message, int err = 0) {
+        std::cerr << _ERROR << message;
+        if (err != 0) {
+            std::cerr << std::strerror(errno);
+        }
+        std::cerr << std::endl << _DEFAULT;
+    }
+
+    bool file_exists(std::string const &path) {
+        return access(path.c_str(), F_OK) != -1;
+    }
 
     void process(std::string const &command) {
         auto args = parser::parse_command_line(command);
@@ -129,24 +173,52 @@ namespace runtime {
             if (args.size() != 1) {
                 throw runtime_exception("Invalid 'help' syntax, expected no arguments");
             }
+            std::cout << "Kidshell v.1.0.0. Basic shell emulator.\nAvailable commands:\n";
             std::for_each(USAGE.begin(), USAGE.end(), [](std::pair<std::string, std::string> const &use) {
-                std::cout << use.first << USAGE_SEP << use.second << '\n';
+                std::cout << "  " << use.first << USAGE_SEP << use.second << std::endl;
             });
         } else if (args[0] == "exit") {
             RUNNING = false;
         } else {
+            if (!file_exists(args[0])) {
+                throw runtime_exception("Specified path does not exist");
+            }
 
-            // run program
+            auto cargs = convert_to_cstring(args);
+            auto cenv = convert_to_cstring(ENV.get_all());
 
+            pid_t pid = fork();
+            if (pid == -1) {
+                report("Fork failed: ", errno);
+            } else if (pid == 0) {
+                if (execve(cargs[0], cargs.data(), cenv.data()) == -1) {
+                    exit(EXIT_FAILURE);
+                } else {
+                    exit(EXIT_SUCCESS);
+                }
+            } else {
+                int status;
+                if (waitpid(pid, &status, 0) == -1 || !WIFEXITED(status)) {
+                    report("Execution failed: ", errno);
+                } else {
+                    std::cout << "Return code: " << WEXITSTATUS(status) << std::endl;
+                }
+            }
         }
     }
 
 }
 
-int main() {
+int main(int argc, char *argv[]) {
+
+    std::cout << runtime::_DEFAULT << "call@";
+    for (int i = 0; i < argc; i++) {
+        std::cout << argv[i] << ' ';
+    }
+    std::cout << std::endl;
 
     while (runtime::RUNNING) {
-        std::cout << runtime::PREFIX;
+        std::cout << runtime::PREFIX << "me: ";
         std::cout.flush();
 
         std::string command;
@@ -155,9 +227,10 @@ int main() {
         try {
             runtime::process(command);
         } catch (std::runtime_error const &e) {
-            std::cerr << e.what() << '\n';
+            runtime::report(e.what());
         }
         if (std::cin.eof()) {
+            std::cout << std::endl;
             runtime::RUNNING = false;
         }
     }
