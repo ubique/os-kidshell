@@ -48,8 +48,7 @@ void print_error(string query) {
 
 int main() {
     string query, response;
-    while (true) {
-        getline(cin, query);
+    while (getline(cin, query)) {
         if (query.back() == '\n') query.pop_back();
         response = "";
         auto data = split(query);
