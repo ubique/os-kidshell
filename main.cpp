@@ -16,8 +16,6 @@ using std::endl;
 using std::cout;
 using std::find_if;
 
-//TODO ctrl+d(EOF)
-
 static const auto lambda = [](int ch) {
     return !isspace(ch);
 };
@@ -113,6 +111,8 @@ void trim(string &s) {
 int main(int argc, char **argv, char **env) {
     Enviroment enviroment(env);
     do {
+        if(cin.eof())
+            break;
         int return_code = 0;
         string input;
         cout << ">> ";
