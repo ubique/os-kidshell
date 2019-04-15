@@ -38,8 +38,7 @@ pair <char*, char**> split(string query) {
 
 int main() {
     string query, response;
-    freopen("input.txt", "r", stdin);
-    for (int i = 0; i < 5; i++) {
+    while (true) {
         getline(cin, query);
         if (query.back() == '\n') query.pop_back();
         response = "";
@@ -50,13 +49,15 @@ int main() {
             auto data = split(query);
             char *env[] = {nullptr};
             if (execve(data.first, data.second, env) == -1) {
+                delete[] data.second;
                 response = "Call " + query + " failed: " + strerror(errno);
                 cout << response << endl;
                 exit(125);
             }
+            delete[] data.second;
         } else if (pid) {
             int status;
-            wait(&status);
+            waitpid(-1, &status, 0);
             if (WIFEXITED(status)) {
                 if (WEXITSTATUS(status) != 125) {
                     response = "Call " + query + " performed:\n" + "Exit code is " + to_string(WEXITSTATUS(status));
@@ -69,6 +70,5 @@ int main() {
             cout << response << endl;
         }
     }
-
     return 0;
 }
