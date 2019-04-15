@@ -128,7 +128,6 @@ int main(int argc, char const *argv[]) {
         if (getcwd(currentdirectory, 128) == nullptr) {
             perror("Can't get current dir");
             std::cout << ":$ ";
-            free(currentdirectory);
         } else {
             printf("%s: $ ", currentdirectory);
         }
