@@ -4,7 +4,8 @@
 #include <unistd.h>
 #include <sstream>
 #include <sys/wait.h>
-
+#include <cstdlib>
+#include <cstring>
 
 std::map<std::string, std::string> envPars;
 bool running = true;
@@ -40,9 +41,9 @@ std::vector<std::string> parseCommand(std::string const & command){
 char ** getEnvs(){
     char * ans[envPars.size()];
     int pos = 0;
-    for (auto it : envPars) {
-        ans[pos] = static_cast<char *>(malloc((it.first + "=" + it.second).size()));
-        strcpy(ans[pos], (it.first + "=" + it.second).c_str());
+    for (std::pair<std::string, std::string> const & it : envPars) {
+        ans[pos] = static_cast<char *>(std::malloc((it.first + "=" + it.second).size()));
+        std::strcpy(ans[pos], (it.first + "=" + it.second).c_str());
         pos++;
     }
     return ans;
@@ -52,7 +53,7 @@ void execute(std::string const & command){
     std::vector<std::string> parsedCommand = parseCommand(command);
     char * argv[parsedCommand.size()];
     for (int i = 0; i < parsedCommand.size(); i++){
-        strcpy(argv[i], (parsedCommand[i]).c_str());
+        std::strcpy(argv[i], (parsedCommand[i]).c_str());
     }
 
     switch(pid_t pid = fork()) {
@@ -65,9 +66,9 @@ void execute(std::string const & command){
                 std::cout << "can't execute";
             }
             for (int i = 0; i < envPars.size(); i++){
-                free(envs[i]);
+                std::free(envs[i]);
             }
-            free(envs);
+            std::free(envs);
             break;
         }
         default:
