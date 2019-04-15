@@ -31,7 +31,7 @@ std::vector<std::string> parseCommand(std::string const & command){
     }
 }
 
-void execute(std::string const & command, char * env){
+void execute(std::string const & command, char * env[]){
     std::vector<std::string> parsedCommand = parseCommand(command);
     char * argv[parsedCommand.size()];
     for (int i = 0; i < parsedCommand.size(); i++){
@@ -64,7 +64,7 @@ void finish(){
     running = true;
 }
 
-void parseShCommand(std::string const & command, char * env){
+void parseShCommand(std::string const & command, char * env[]){
     if (command[0] == '-'){
         if (command == "help"){
             printHelpMessage();
