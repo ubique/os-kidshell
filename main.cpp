@@ -39,14 +39,14 @@ void log_error(string const& msg) {
     cerr.flush();
 }
 
-void exec(string const& exec_path, vector<char*> const& args) {
+void exec(string const& exec_path, vector<char*> const& args, char* envp[]) {
     pid_t pid;
     switch (pid = fork()) {
         case -1: // error
             log_error("fork failed.");
             break;
         case 0: //child subprocess
-            if (execv(exec_path.c_str(), args.data()) == -1) {
+            if (execve(exec_path.c_str(), args.data(), envp) == -1) {
                 log_error("program finished with -1 code.");
                 exit(EXIT_FAILURE);
             }
@@ -63,7 +63,7 @@ void exec(string const& exec_path, vector<char*> const& args) {
     }
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[], char *envp[]) {
     string raw_str;
     while (true) {
         cout << "$ ";
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
         if (raw_str == "exit" || cin.eof())
             break;
         auto args = split_args(raw_str);
-        exec(args.first, args.second);
+        exec(args.first, args.second, envp);
     }
     return 0;
 }
