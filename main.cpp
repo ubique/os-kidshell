@@ -8,7 +8,6 @@
 
 //std::map<std::string, std::string> envPars;
 bool running = true;
-char * envPars[];
 
 
 void printHelpMessage(){
@@ -32,7 +31,7 @@ std::vector<std::string> parseCommand(std::string const & command){
     }
 }
 
-void execute(std::string const & command){
+void execute(std::string const & command, char * env){
     std::vector<std::string> parsedCommand = parseCommand(command);
     char * argv[parsedCommand.size()];
     for (int i = 0; i < parsedCommand.size(); i++){
@@ -44,7 +43,7 @@ void execute(std::string const & command){
             std::cout << "cant't fork" << std::endl;
             break;
         case 0: {
-            if (execve(argv[0], argv, envPars) == -1) {
+            if (execve(argv[0], argv, env) == -1) {
                 std::cout << "can't execute";
                 exit(-1);
             }
@@ -61,7 +60,7 @@ void execute(std::string const & command){
     }
 }
 
-void parseShCommand(std::string const & command){
+void parseShCommand(std::string const & command, char * env){
     if (command[0] == '-'){
         if (command == "-h" || command == "-help"){
             printHelpMessage();
@@ -72,16 +71,15 @@ void parseShCommand(std::string const & command){
             return;
         }
     }
-    execute(command);
+    execute(command, env);
 }
 
 int main(int argc, char * env[]) {
-    envPars = env;
     printHelpMessage();
     while (running){
         std::string command;
         getline(std::cin, command);
-        parseShCommand(command);
+        parseShCommand(command, env);
     }
     return 0;
 }
