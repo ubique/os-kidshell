@@ -8,7 +8,7 @@
 
 using namespace std;
 
-pair <char*, char**> split(string query) {
+pair <int, char**> split(string query) {
     if (query[0] != '/') {
         query.insert(query.begin(), '/');
     }
@@ -32,8 +32,18 @@ pair <char*, char**> split(string query) {
             argv[i][j] = args[i][j];
         }
     }
-    char* filename = argv[0];
-    return {filename, argv};
+    return {args.size(), argv};
+}
+
+void free_argv_memory(int sz, char** argv) {
+    for (int i = 0; i < sz; i++) {
+        delete[] argv[i];
+    }
+    delete[] argv;
+}
+
+void print_error(string query) {
+    cout << "Call " + query + " failed: " + strerror(errno) << endl;
 }
 
 int main() {
@@ -42,32 +52,30 @@ int main() {
         getline(cin, query);
         if (query.back() == '\n') query.pop_back();
         response = "";
+        auto data = split(query);
         const pid_t pid = fork();
         if (pid == -1) {
             cout << "Call failed: " << strerror(errno) << endl;
         } else if (!pid) {
-            auto data = split(query);
             char *env[] = {nullptr};
-            if (execve(data.first, data.second, env) == -1) {
-                delete[] data.second;
-                response = "Call " + query + " failed: " + strerror(errno);
-                cout << response << endl;
-                exit(125);
+            if (execve(data.second[0], data.second, env) == -1) {
+                print_error(query);
+                exit(EXIT_FAILURE);
             }
-            delete[] data.second;
+            exit(EXIT_SUCCESS);
         } else if (pid) {
             int status;
-            waitpid(pid, &status, 0);
-            if (WIFEXITED(status)) {
-                if (WEXITSTATUS(status) != 125) {
+            if (waitpid(pid, &status, 0) == -1) {
+                print_error(query);
+            } else {
+                if (WIFEXITED(status)) {
                     response = "Call " + query + " performed:\n" + "Exit code is " + to_string(WEXITSTATUS(status));
                 } else {
-                    continue;
+                    response = "Call " + query + "exited abnormally";
                 }
-            } else {
-                response = "Call " + query + "exited abnormally";
+                cout << response << endl;
             }
-            cout << response << endl;
+            free_argv_memory(data.first, data.second);
         }
     }
     return 0;
