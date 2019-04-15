@@ -34,7 +34,7 @@ public:
 
     struct environment_exception : public std::runtime_error {
 
-        environment_exception(std::string const &message) : runtime_error(message) {};
+        environment_exception(std::string const &message) : runtime_error(message) {}
 
     };
 
@@ -73,7 +73,7 @@ namespace parser {
 
     struct parsing_exception : std::runtime_error {
 
-        parsing_exception(std::string const &message) : runtime_error(message) {};
+        parsing_exception(std::string const &message) : runtime_error(message) {}
 
     };
 
@@ -118,7 +118,7 @@ namespace runtime {
 
     struct runtime_exception : public std::runtime_error {
 
-        runtime_exception(std::string const &message) : runtime_error(message) {};
+        runtime_exception(std::string const &message) : runtime_error(message) {}
 
     };
 
