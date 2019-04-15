@@ -24,16 +24,14 @@ using std::istringstream;
 pair<string, vector<char*>> split_args(string const& raw_str) {
     vector<char*> list_of_args;
     istringstream iss(raw_str);
-    string path_str, argv_str;
-    iss >> path_str;
+    string tmp, argv_str;
     while (iss >> argv_str) {
         argv_str += '\0';
-        list_of_args.push_back(const_cast<char*>(argv_str.c_str()));
+        list_of_args.push_back(new char[argv_str.size()]);
+        std::copy(argv_str.begin(), argv_str.end(), list_of_args.back());
     }
-    if (list_of_args.empty()) {
-        list_of_args.push_back(const_cast<char *>("")); // the first arg mustn't be null
-    }
-    return std::make_pair(path_str, list_of_args);
+    list_of_args.push_back(nullptr);
+    return std::make_pair(list_of_args[0], list_of_args);
 }
 
 void log_error(string const& msg) {
