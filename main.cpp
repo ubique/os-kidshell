@@ -60,10 +60,18 @@ void execute(std::string const & command, char * env){
     }
 }
 
+void finish(){
+    running = true;
+}
+
 void parseShCommand(std::string const & command, char * env){
     if (command[0] == '-'){
-        if (command == "-h" || command == "-help"){
+        if (command == "help"){
             printHelpMessage();
+            return;
+        }
+        else if (command == "exit"){
+            finish();
             return;
         }
         else{
