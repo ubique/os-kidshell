@@ -27,8 +27,11 @@ pair<string, vector<char*>> split_args(string const& raw_str) {
     string path_str, argv_str;
     iss >> path_str;
     while (iss >> argv_str) {
-        argv_str += '0';
+        argv_str += '\0';
         list_of_args.push_back(const_cast<char*>(argv_str.c_str()));
+    }
+    if (list_of_args.empty()) {
+        list_of_args.push_back(const_cast<char *>("")); // the first arg mustn't be null
     }
     return std::make_pair(path_str, list_of_args);
 }
@@ -46,6 +49,7 @@ void exec(string const& exec_path, vector<char*> const& args, char* envp[]) {
             log_error("fork failed.");
             break;
         case 0: //child subprocess
+            //cout << args[0] << endl;
             if (execve(exec_path.c_str(), args.data(), envp) == -1) {
                 log_error("program finished with -1 code.");
                 exit(EXIT_FAILURE);
