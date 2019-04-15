@@ -41,7 +41,7 @@ char ** getEnvs(){
     char * ans[envPars.size()];
     int pos = 0;
     for (auto it : envPars) {
-        std::string tmp = (it.first + "=" + it.second);
+        ans[pos] = static_cast<char *>(malloc((it.first + "=" + it.second).size()));
         strcpy(ans[pos], (it.first + "=" + it.second).c_str());
         pos++;
     }
@@ -60,10 +60,14 @@ void execute(std::string const & command){
             std::cout << "cant't fork" << std::endl;
             break;
         case 0: {
-            if (execve(argv[0], argv, getEnvs()) == -1) {
+            char ** envs = getEnvs();
+            if (execve(argv[0], argv, envs) == -1) {
                 std::cout << "can't execute";
-                exit(-1);
             }
+            for (int i = 0; i < envPars.size(); i++){
+                free(envs[i]);
+            }
+            free(envs);
             break;
         }
         default:
