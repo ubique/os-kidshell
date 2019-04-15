@@ -34,6 +34,7 @@ std::vector<std::string> parseCommand(std::string const & command){
             last = i + 1;
         }
     }
+    return result;
 }
 
 
