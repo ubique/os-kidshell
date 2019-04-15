@@ -128,7 +128,7 @@ int main(int argc, char **argv, char **env) {
             } else if (args[0] == "remove") {
                 enviroment.remove_var(args);
             } else {
-                __pid_t id = fork();
+                pid_t id = fork();
                 if (id == -1) {
                     print_error("fork failed");
                 } else if (id != 0) {
