@@ -45,11 +45,20 @@ namespace
 	};
 }
 
+std::string get_cs_path()
+{
+	const auto cs_path_length = confstr(_CS_PATH, nullptr, 0);
+	auto cs_path_buf = std::string();
+	cs_path_buf.resize(cs_path_length);
+	confstr(_CS_PATH, cs_path_buf.data(), cs_path_buf.size());
+	return cs_path_buf;
+}
+
 int main()
 {
 	for (std::string line; std::cout << '>', std::getline(std::cin, line);)
 	{
-		auto we = wordexp_guard(line.c_str(), 0);
+		const auto we = wordexp_guard(line.c_str(), 0);
 		if (const auto we_res = we.get_retval(); we_res != 0)
 		{
 			const char* err_msg;
@@ -84,7 +93,8 @@ int main()
 		if (pid == 0)
 		{
 			extern char** environ;
-			const auto path = getenv("PATH");
+			const auto env_path = getenv("PATH");
+			const auto path = env_path != nullptr ? std::string(env_path) : get_cs_path();
 			auto path_stream = std::istringstream(path);
 			auto had_eacces = false;
 			for (std::string subpath; std::getline(path_stream, subpath, ':'); )
