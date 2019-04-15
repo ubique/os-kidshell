@@ -1,2 +1,2 @@
 all:
-        g++ kidshell.cpp -o kidshell
+	g++ kidshell.cpp -o kidshell
