@@ -1,7 +1,8 @@
 #include <iostream>
 #include <string>
-#include <sstream>
+#include <cstring>
 
+#include <sstream>
 #include <vector>
 #include <unordered_map>
 #include <functional>
@@ -9,7 +10,7 @@
 
 #include <unistd.h>
 #include <sys/wait.h>
-#include <cstring>
+#include <limits.h>
 
 std::string USAGE_SEP = "\n\t";
 std::vector<std::pair<std::string, std::string>> USAGE{
@@ -18,6 +19,7 @@ std::vector<std::pair<std::string, std::string>> USAGE{
     {"set KEY=VALUE [KEY=VALUE]*", "- set environment variables"},
     {"unset KEY [KEY]*", "- unset environment variables"},
     {"list", "- list all environment variables"},
+    {"cd PATH", "- change directory to specified PATH"},
 
     {"help", "- show this help message"},
     {"exit", "- exit shell"}
@@ -109,10 +111,12 @@ namespace parser {
 
 namespace runtime {
 
+    std::string _NAME = "\033[1;32m";
+    std::string _LOCATION = "\033[1;34m";
     std::string _ERROR = "\033[31m";
     std::string _DEFAULT = "\033[0m";
 
-    std::string PREFIX = "shell@";
+    std::string PREFIX = "my@shell";
     bool RUNNING = true;
     environment ENV;
 
@@ -143,6 +147,24 @@ namespace runtime {
         return access(path.c_str(), F_OK) != -1;
     }
 
+    std::string get_directory() {
+        char cwd[PATH_MAX];
+        if (getcwd(cwd, PATH_MAX) != nullptr) {
+            return std::string(cwd);
+        } else {
+            return "";
+        }
+    }
+
+    std::string get_descriptor() {
+        std::string cwd = get_directory();
+        std::string prefix = _NAME + PREFIX;
+        if (cwd != "") {
+            prefix += ":" + _LOCATION + cwd;
+        }
+        return prefix + _DEFAULT + "$";
+    }
+
     void process(std::string const &command) {
         auto args = parser::parse_command_line(command);
 
@@ -169,6 +191,14 @@ namespace runtime {
                 throw runtime_exception("Invalid 'list' syntax, expected no arguments");
             }
             ENV.list(std::cout);
+        } else if (args[0] == "cd") {
+            if (args.size() == 1) {
+                throw runtime_exception("Invalid 'cd' syntax, usage : " + USAGE[4].first);
+            }
+            std::string location = args[1][0] == '/' ? args[1] : get_directory() + '/' + args[1];
+            if (chdir(location.c_str()) != 0) {
+                throw runtime_exception("Directory '" + args[1] + "' does not exist");
+            }
         } else if (args[0] == "help") {
             if (args.size() != 1) {
                 throw runtime_exception("Invalid 'help' syntax, expected no arguments");
@@ -218,7 +248,7 @@ int main(int argc, char *argv[]) {
     std::cout << std::endl;
 
     while (runtime::RUNNING) {
-        std::cout << runtime::PREFIX << "me: ";
+        std::cout << runtime::get_descriptor() << " ";
         std::cout.flush();
 
         std::string command;
