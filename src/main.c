@@ -17,6 +17,7 @@ int main(int argc, char *argv[], char *envp[]) {
     pid_t child_pid;
     char exit_status_message[MAX_LEN];
     int wstatus;
+    int i;
     wordexp_t p;
 
 
@@ -32,7 +33,29 @@ int main(int argc, char *argv[], char *envp[]) {
             return EXIT_SUCCESS;
 
         command[strlen(command) - 1] = '\0';
+        i = 0;
+        while (i < strlen(command) && command[i] != '=') {
+            i++;
+        }
+        if (i < strlen(command)) {
+            command[i] = ' ';
+        }
+        
         wordexp(command, &p, 0);
+
+        if (!strcmp(p.we_wordv[0], "export") && p.we_wordc == 3) {
+            printf("Set variable %s to \"%s\"\n", p.we_wordv[1], p.we_wordv[2]);
+            setenv(p.we_wordv[1], p.we_wordv[2], true);
+            printf(">> ");
+            continue;
+        } 
+        
+        if (!strcmp(p.we_wordv[0], "unset") && p.we_wordc == 2) {
+            unsetenv(p.we_wordv[1]);
+            printf("Unset variable %s\n", p.we_wordv[1]);
+            printf(">> ");
+            continue;
+        }
 
         child_pid = fork();
         switch (child_pid) {
