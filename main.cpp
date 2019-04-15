@@ -6,12 +6,16 @@
 #include <sys/wait.h>
 
 
-//std::map<std::string, std::string> envPars;
+std::map<std::string, std::string> envPars;
 bool running = true;
 
 
 void printHelpMessage(){
-    std::cout << "some information" << std::endl;
+    std::cout << ":help for this message\n"
+                 ":exit for exit\n"
+                 ":set <name> <val> set par with <name> to <val>\n"
+                 ":unset <name> for unset\n"
+                 ":unsetall fot clear all env pars" << std::endl;
 }
 
 void printUnknownCommand(std::string command){
@@ -31,11 +35,24 @@ std::vector<std::string> parseCommand(std::string const & command){
     }
 }
 
-void execute(std::string const & command, char * env[]){
+
+
+char ** getEnvs(){
+    char * ans[envPars.size()];
+    int pos = 0;
+    for (auto it : envPars) {
+        std::string tmp = (it.first + "=" + it.second);
+        strcpy(ans[pos], (it.first + "=" + it.second).c_str());
+        pos++;
+    }
+    return ans;
+}
+
+void execute(std::string const & command){
     std::vector<std::string> parsedCommand = parseCommand(command);
     char * argv[parsedCommand.size()];
     for (int i = 0; i < parsedCommand.size(); i++){
-        argv[i] = const_cast<char *>(parsedCommand[i].data());
+        strcpy(argv[i], (parsedCommand[i]).c_str());
     }
 
     switch(pid_t pid = fork()) {
@@ -43,7 +60,7 @@ void execute(std::string const & command, char * env[]){
             std::cout << "cant't fork" << std::endl;
             break;
         case 0: {
-            if (execve(argv[0], argv, env) == -1) {
+            if (execve(argv[0], argv, getEnvs()) == -1) {
                 std::cout << "can't execute";
                 exit(-1);
             }
@@ -64,30 +81,45 @@ void finish(){
     running = true;
 }
 
-void parseShCommand(std::string const & command, char * env[]){
-    if (command[0] == '-'){
-        if (command == "help"){
+void parseShCommand(std::string const & command){
+    if (command[0] == ':'){
+        if (command == ":help"){
             printHelpMessage();
             return;
         }
-        else if (command == "exit"){
+        std::vector<std::string> parsed = parseCommand(command);
+        if (parsed[0] == ":exit"){
             finish();
             return;
+        }
+        else if (parsed[0] == ":set"){
+            if (parsed.size() == 2){
+                envPars[parsed[1]] = "";
+            }
+            else if (parsed.size() == 3){
+                envPars[parsed[2]] = parsed[3];
+            }
+        }
+        else if (parsed[0] == ":unset" && parsed.size() == 2) {
+            envPars.erase(parsed[1]);
+        }
+        else if (parsed[0] == ":unsetall"){
+            envPars.clear();
         }
         else{
             printUnknownCommand(command);
             return;
         }
     }
-    execute(command, env);
+    execute(command);
 }
 
-int main(int argc, char * env[]) {
+int main() {
     printHelpMessage();
     while (running){
         std::string command;
         getline(std::cin, command);
-        parseShCommand(command, env);
+        parseShCommand(command);
     }
     return 0;
 }
