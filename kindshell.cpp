@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <exception>
+
 #include <unordered_map>
 #include <unistd.h>
 #include <sys/types.h>
@@ -7,10 +9,11 @@
 
 using namespace std;
 
-string welcomeMessage = "KindShell created by Baykaov Vladimir\nGroup M3234\n";
-string helpMessage = "Commands:\nHelp: Shows help\nSet <var_name> <var_value>: Creates or Rewrites variable\nVariables: Shows all variables\nExit: Shuts down program\n";
-string unexpectedSetMessage = "Unexpected input\nExpected set <var_name> <var_value>\n";
-string exitMessage = "Exit program\n";
+const string welcomeMessage = "KindShell created by Baykaov Vladimir\nGroup M3234\n";
+const string helpMessage = "Commands:\nHelp: Shows help\nSet <var_name>=<var_value>: Creates or Rewrites variable\nRemove <var_name>: Removes variable\nVariables: Shows all variables\nExit: Shuts down program\n";
+const string unexpectedSetMessage = "Unexpected input\nExpected: Set <var_name>=<var_value>\n";
+const string unexpectedRemoveMessage = "Unexpected input\nExpected: Remove <var_name>\n";
+const string exitMessage = "Exit program\n";
 
 unordered_map<string, string> environmentVariables;
 
@@ -62,6 +65,7 @@ void executeCommand(vector<string> &tokens) {
             int i = 0;
             for (auto &pair : environmentVariables) {
                 variables[i] = (char *) (pair.first + "=" + pair.second).c_str();
+                ++i;
             }
             variables[environmentVariables.size()] = nullptr;
 
@@ -86,7 +90,7 @@ void executeCommand(vector<string> &tokens) {
 
 
 int main(int argc, char *argv[]) {
-    cout << welcomeMessage;
+    cout << welcomeMessage << helpMessage;
     string command;
 
     cout << ">> ";
@@ -98,38 +102,53 @@ int main(int argc, char *argv[]) {
 
         if (lineTokens.empty()) {
             continue;
-        }
 
-        if (lineTokens[0] == "Exit" || cin.eof()) {
+        } else if (lineTokens[0] == "Exit" || cin.eof()) {
             cout << exitMessage;
-            return 0;
-        }
+            exit(0);
 
-        if (lineTokens[0] == "Help") {
+        } else if (lineTokens[0] == "Help") {
             cout << helpMessage;
-            continue;
-        }
 
-        if (lineTokens[0] == "Set") {
-            if (lineTokens.size() != 3) {
+        } else if (lineTokens[0] == "Set") {
+            if (lineTokens.size() == 2) {
+                string varDefinition = lineTokens[1];
+                int equalSignPlace = varDefinition.find('=');
+
+                if (equalSignPlace == -1) {
+                    cout << unexpectedSetMessage;
+                } else {
+                    string varName = varDefinition.substr(0, equalSignPlace);
+                    string varValue = varDefinition.substr(equalSignPlace + 1, varDefinition.size() - equalSignPlace - 1);
+
+                    environmentVariables[varName] = varValue;
+                }
+
+            } else {
                 cout << unexpectedSetMessage;
-                continue;
             }
-            string varName = lineTokens[1];
-            string varValue = lineTokens[2];
 
-            environmentVariables[varName] = varValue;
-            continue;
-        }
+        } else if (lineTokens[0] == "Remove") {
+            if (lineTokens.size() == 2) {
+                string varName = lineTokens[1];
 
-        if (lineTokens[0] == "Variables") {
-            for (auto &variable : environmentVariables) {
-                cout << variable.first << ": " << variable.second << endl;
+                environmentVariables.erase(varName);
+            } else {
+                cout << unexpectedRemoveMessage;
             }
-            continue;
-        }
 
-        executeCommand(lineTokens);
+        } else if (lineTokens[0] == "Variables") {
+            if (environmentVariables.empty()) {
+                cout << "There is on env variables" << endl;
+            } else {
+                for (auto &variable : environmentVariables) {
+                    cout << variable.first << ": " << variable.second << endl;
+                }
+            }
+
+        } else {
+            executeCommand(lineTokens);
+        }
 
         cout << ">> ";
     }
