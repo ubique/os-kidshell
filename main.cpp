@@ -11,7 +11,7 @@
 using namespace std;
 
 map<string, string> env;
-char ** envirmas;
+char **envirmas;
 
 void recount() {
     std::vector<char *> vec;
@@ -116,26 +116,25 @@ int main(int argc, char *argv[]) {
                 break;
             case 0: {
                 //child
-                char **args = new char *[commands.size() + 1];
+                vector<const char *> args(commands.size() + 1);
                 for (int i = 0; i < commands.size(); ++i)
-                    strcpy(args[i],commands[i].data());
+                    args[i] = commands[i].data();
                 args[commands.size()] = nullptr;
                 recount();
-                if (execve(commands[0].data(), args, envirmas) == -1) {
+                if (execve(args[0], const_cast<char *const *>(args.data()), envirmas) == -1) {
                     perror("execve");
                     exit(1);
                 }
-
-                break;
             }
             default:
                 //parent
                 int result;
-                if (waitpid(pid, &result, 0) != -1) {
-                    cout << "Result: " << result << '\n';
-                } else {
+                if (waitpid(pid, &result, 0) == -1) {
                     perror("waitpid");
-                }
+                    break;
+                } else
+                    cout << "Result: " << result << '\n';
+                break;
         }
         getcwd(dir, size);
         cout << dir << ">> ";
