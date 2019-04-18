@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -std=c99 -ansi
-SRCS = src/main.c src/exit_messages.c
+SRCS = src/main.c src/exit_messages.c src/hashmap.c
 OBJS = $(SRCS: .c = .o)
 PROG = interpreter
 
