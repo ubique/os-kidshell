@@ -3,4 +3,4 @@ project(terminal)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(terminal main.cpp)
+add_executable(terminal main.cpp) 

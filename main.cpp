@@ -73,7 +73,7 @@ void executeExport(std::vector<char *> args) {
     if (args.size() == 2) { //output export
         for (auto &i : environment) {
             if(i.second == ""){
-                std::cout<<i.first<<"\n";
+                std::cout<<i.first<<"="<<"\n";
                 continue;
             }
             std::cout << i.first << "=" << "\"" << i.second << "\"" << "\n";
@@ -109,6 +109,7 @@ void prepare_command(std::string &command) {
             strcpy(tmp, s.data());
             envir.push_back(tmp);
         }
+        envir.push_back(nullptr);
         execute(args.data(), envir.data());
         envir.clear();
     }
