@@ -1,3 +1,4 @@
+#include <sys/wait.h>
 #include <sys/syscall.h>
 #include <unistd.h>
 
@@ -6,6 +7,7 @@
 #include <cstring>
 #include <vector>
 #include <sstream>
+#include <cerrno>
 
 char** parse(const std::string& s) {
     std::stringstream stream(s);
