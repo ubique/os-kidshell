@@ -65,8 +65,14 @@ void execute(vector<string> const& argsv, vector<string> const& envv) {
         int status;
         if (waitpid(pid, &status, 0) == -1) {
             cerr << "Wait failed: " << strerror(errno) << endl;
+        }
+
+        if (WIFEXITED(status)) {
+            cout << "Program finished with exit code " << WEXITSTATUS(status) << endl;
+        } else if (WIFSIGNALED(status)) {
+            cout << "Program killed by signal " << WTERMSIG(status) << endl;
         } else {
-            cout << "Program finished with exit code " << status << endl;
+            cout << "Program finished in unknown way" << endl;
         }
     }
 }
