@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <cstdio>
 
-
+// JavaDoc lol kek cheburek
 void do_shell(std::vector<std::string> args, char **envp) {
     size_t size = args.size();
     std::vector<char *> args_in_c(size);
