@@ -34,13 +34,14 @@ std::vector<std::string> parseCommand(std::string const & command){
             last = i + 1;
         }
     }
+    result.push_back(command.substr(static_cast<unsigned int>(last), static_cast<unsigned int>(command.size() - last)));
     return result;
 }
 
 
 
-char ** getEnvs(){
-    char * ans[envPars.size()];
+std::vector<char*> getEnvs(){
+    std::vector<char *> ans(envPars.size());
     int pos = 0;
     for (std::pair<std::string, std::string> const & it : envPars) {
         ans[pos] = static_cast<char *>(std::malloc((it.first + "=" + it.second).size()));
@@ -62,14 +63,13 @@ void execute(std::string const & command){
             std::cout << "cant't fork" << std::endl;
             break;
         case 0: {
-            char ** envs = getEnvs();
-            if (execve(argv[0], argv, envs) == -1) {
+            std::vector<char*> envs = getEnvs();
+            if (execve(argv[0], argv, envs.data()) == -1) {
                 std::cout << "can't execute";
             }
             for (int i = 0; i < envPars.size(); i++){
                 std::free(envs[i]);
             }
-            std::free(envs);
             break;
         }
         default:
