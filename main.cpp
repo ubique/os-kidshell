@@ -84,7 +84,7 @@ void execute(std::string const & command){
 }
 
 void finish(){
-    running = true;
+    running = false;
 }
 
 void parseShCommand(std::string const & command){
@@ -124,8 +124,11 @@ int main() {
     printHelpMessage();
     while (running){
         std::string command;
-        getline(std::cin, command);
-        parseShCommand(command);
+        if (getline(std::cin, command))
+            parseShCommand(command);
+        else{
+            finish();
+        }
     }
     return 0;
 }
