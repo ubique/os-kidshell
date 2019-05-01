@@ -65,9 +65,7 @@ void execute(vector<string> const& argsv, vector<string> const& envv) {
         int status;
         if (waitpid(pid, &status, 0) == -1) {
             cerr << "Wait failed: " << strerror(errno) << endl;
-        }
-
-        if (WIFEXITED(status)) {
+        } else if (WIFEXITED(status)) {
             cout << "Program finished with exit code " << WEXITSTATUS(status) << endl;
         } else if (WIFSIGNALED(status)) {
             cout << "Program killed by signal " << WTERMSIG(status) << endl;
@@ -78,7 +76,6 @@ void execute(vector<string> const& argsv, vector<string> const& envv) {
 }
 
 int main(int argc, char* argv[], char* env[]) {
-    //vector<string> enviroment;
     auto ptr = env;
     while (*ptr != nullptr) {
         string tmp = *ptr;
