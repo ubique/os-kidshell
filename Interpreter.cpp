@@ -36,6 +36,7 @@ int main() {
         if (pid == 0) {
             if (execv(args[0], args) == -1) {
                 std::cout << strerror(errno) << std::endl;
+                exit(-1);
             }
         } else {
             int status = 0;
@@ -54,6 +55,7 @@ int main() {
                 std::cout << strerror(errno) << std::endl;
             }
         }
+        code = code == 255 ? -1 : code;
         std::cout << "Program returns with code " << code << std::endl;
     }
     return 0;
