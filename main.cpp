@@ -112,8 +112,9 @@ int main(int argc, char *argv[]) {
         pid_t pid;
         switch (pid = fork()) {
             case -1:
+                //error
                 perror("fork");
-                break;
+                exit(1);
             case 0: {
                 //child
                 vector<const char *> args(commands.size() + 1);
@@ -125,15 +126,16 @@ int main(int argc, char *argv[]) {
                     perror("execve");
                     exit(1);
                 }
+                break;
             }
             default:
                 //parent
                 int result;
                 if (waitpid(pid, &result, 0) == -1) {
                     perror("waitpid");
-                    break;
+                    exit(1);
                 } else
-                    cout << "Result: " << result << '\n';
+                    cout << "Result: " << WEXITSTATUS(result) << '\n';
                 break;
         }
         getcwd(dir, size);
