@@ -65,7 +65,7 @@ void execute(std::string const & command){
         case 0: {
             std::vector<char*> envs = getEnvs();
             if (execve(argv[0], argv, envs.data()) == -1) {
-                std::cout << "can't execute";
+                std::cout << "can't execute" << std::endl;
             }
             for (int i = 0; i < envPars.size(); i++){
                 std::free(envs[i]);
@@ -117,7 +117,9 @@ void parseShCommand(std::string const & command){
             return;
         }
     }
-    execute(command);
+    else {
+        execute(command);
+    }
 }
 
 int main() {
