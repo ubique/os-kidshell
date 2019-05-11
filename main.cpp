@@ -53,33 +53,41 @@ std::vector<char*> getEnvs(){
 
 void execute(std::string const & command){
     std::vector<std::string> parsedCommand = parseCommand(command);
-    char * argv[parsedCommand.size()];
+    char * argv[parsedCommand.size() + 1];
     for (int i = 0; i < parsedCommand.size(); i++){
-        std::strcpy(argv[i], (parsedCommand[i]).c_str());
+        //std::strcpy(argv[i], (parsedCommand[i]).c_str());
+        argv[i] = const_cast<char*>(parsedCommand[i].c_str());
     }
+    argv[parsedCommand.size()] = nullptr;
 
     switch(pid_t pid = fork()) {
-        case -1:
+        case -1: {
             std::cout << "cant't fork" << std::endl;
             break;
+        }
         case 0: {
             std::vector<char*> envs = getEnvs();
             if (execve(argv[0], argv, envs.data()) == -1) {
                 std::cout << "can't execute" << std::endl;
+                for (int i = 0; i < envPars.size(); i++){
+                    std::free(envs[i]);
+                }
+                exit(EXIT_FAILURE);
             }
             for (int i = 0; i < envPars.size(); i++){
                 std::free(envs[i]);
             }
             break;
         }
-        default:
+        default: {
             int status;
             if (waitpid(pid, &status, 0) == -1) {
-                std::cout << "can't execute\n";
+                std::cout << "can't execute" << std::endl;
             } else {
-                std::cout << "\nreturn code: " << WEXITSTATUS(status) << '\n';
+                std::cout << "\nreturn code: " << WEXITSTATUS(status) << std::endl;
             }
             break;
+        }
     }
 }
 
@@ -126,8 +134,9 @@ int main() {
     printHelpMessage();
     while (running){
         std::string command;
-        if (getline(std::cin, command))
+        if (getline(std::cin, command)) {
             parseShCommand(command);
+        }
         else{
             finish();
         }
