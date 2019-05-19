@@ -20,6 +20,7 @@ void recount() {
         char *tmp = new char[128];
         strcpy(tmp, s.data());
         vec.push_back(tmp);
+        delete[] tmp;
     }
     vec.push_back(nullptr);
     envirmas = vec.data();
