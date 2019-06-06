@@ -10,4 +10,4 @@ target_link_libraries(main shell)
 
 add_executable(test test.cpp)
 target_link_libraries(test shell)
-#target_compile_options(test PUBLIC $<$<COMPILE_LANGUAGE:CXX>:-std=c++17 -static-libasan -fsanitize=address,undefined,leak>)
+set_target_properties(shell test PROPERTIES CXX_STANDARD 17)
