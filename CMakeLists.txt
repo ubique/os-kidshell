@@ -10,4 +10,4 @@ target_link_libraries(main shell)
 
 add_executable(test test.cpp)
 target_link_libraries(test shell)
-set_target_properties(shell test PROPERTIES CXX_STANDARD 17)
+set_target_properties(shell test main PROPERTIES CXX_STANDARD 17)
