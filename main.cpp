@@ -13,8 +13,6 @@ using namespace std;
 
 map<string, string> env;
 
-void processExecve(string *pString, char **data);
-
 void printExport() {
     for (auto &i : env)
         cout << i.first << "=\"" << i.second << "\"\n";
@@ -136,9 +134,9 @@ int main(int argc, char *argv[]) {
         envir.push_back(nullptr);
         processExecve(commands.data(), envir.data());
         envir.clear();
+        commands.clear();
         getcwd(dir, size);
         cout << dir << ">> ";
-        args.clear();
     }
     return 0;
 }
