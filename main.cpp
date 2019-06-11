@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
         }
         std::vector<char *> envir;
         for (auto &i : env) {
-            std::string s = i.first + "=\"" + i.second + "\"";
+            std::string s = i.first + "=" + i.second;
             char *tmp = new char[128];
             strcpy(tmp, s.data());
             envir.push_back(tmp);
