@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <cstring>
+
 using namespace std;
 
 map<string, string> env;
@@ -18,7 +19,7 @@ void printExport() {
         cout << i.first << "=\"" << i.second << "\"\n";
 }
 
-void addOneExport(const string& a, string b) {
+void addOneExport(const string &a, string b) {
     env[a] = std::move(b);
 }
 
@@ -38,7 +39,7 @@ void parseExport(string str) {
     addOneExport(first, second);
 }
 
-void unset(const string& str) {
+void unset(const string &str) {
     env.erase(str);
 }
 
@@ -51,7 +52,7 @@ void processExecve(char **args, char **data) {
             perror("fork");
         case 0: {
             //child
-            if (execve(args[0], args, data) == -1){
+            if (execve(args[0], args, data) == -1) {
                 perror("execve");
                 exit(EXIT_FAILURE);
             }
@@ -69,7 +70,7 @@ void processExecve(char **args, char **data) {
 }
 
 int main(int argc, char *argv[]) {
-    for (char ** i = environ; *i; ++i)
+    for (char **i = environ; *i; ++i)
         parseExport(*i);
     size_t size = 256;
     char dir[size];
@@ -81,7 +82,7 @@ int main(int argc, char *argv[]) {
         stringstream ss(request);
         string command;
         vector<char *> commands;
-        vector <string> args;
+        vector<string> args;
         while (ss >> command)
             args.push_back(command);
         for (auto &i: args) {
@@ -127,7 +128,7 @@ int main(int argc, char *argv[]) {
         std::vector<char *> envir;
         for (auto &i : env) {
             std::string s = i.first + "=" + i.second;
-            char *tmp = new char[128];
+            char *tmp = new char[s.size() + 1];
             strcpy(tmp, s.data());
             envir.push_back(tmp);
         }
