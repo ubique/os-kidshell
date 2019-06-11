@@ -51,7 +51,6 @@ void processExecve(char **args, char **data) {
         case -1:
             //error
             perror("fork");
-            exit(1);
         case 0: {
             //child
             if (execve(args[0], args, data) == -1){
@@ -65,7 +64,6 @@ void processExecve(char **args, char **data) {
             int result;
             if (waitpid(pid, &result, 0) == -1) {
                 perror("waitpid");
-                exit(1);
             } else
                 cout << "Result: " << WEXITSTATUS(result) << '\n';
             break;
@@ -136,7 +134,7 @@ int main(int argc, char *argv[]) {
             envir.push_back(tmp);
         }
         envir.push_back(nullptr);
-        processExecve(args.data(), envir.data());
+        processExecve(commands.data(), envir.data());
         envir.clear();
         getcwd(dir, size);
         cout << dir << ">> ";
