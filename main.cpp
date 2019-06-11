@@ -1,3 +1,5 @@
+#include <utility>
+
 #include <iostream>
 #include <sstream>
 #include <unistd.h>
@@ -7,28 +9,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <cstring>
-
 using namespace std;
 
 map<string, string> env;
-char **envirmas;
 
-void recount() {
-    std::vector<char *> vec;
-    for (auto &i : env) {
-        std::string s = i.first + "=\"" + i.second + "\"";
-        char *tmp = new char[128];
-        strcpy(tmp, s.data());
-        vec.push_back(tmp);
-        delete[] tmp;
-    }
-    vec.push_back(nullptr);
-    envirmas = vec.data();
-}
+void processExecve(string *pString, char **data);
 
 void printExport() {
     for (auto &i : env)
         cout << i.first << "=\"" << i.second << "\"\n";
+}
+
+void addOneExport(const string& a, string b) {
+    env[a] = std::move(b);
 }
 
 void parseExport(string str) {
@@ -44,23 +37,44 @@ void parseExport(string str) {
     }
     string first = str.substr(0, ind);
     string second = str.substr(ind + 1, str.length() - 1 - ind);
-    env[first] = second;
+    addOneExport(first, second);
 }
 
-void unset(string str) {
+void unset(const string& str) {
     env.erase(str);
 }
 
-void addOneExport(string a, string b) {
-    env[a] = b;
+
+void processExecve(char **args, char **data) {
+    pid_t pid;
+    switch (pid = fork()) {
+        case -1:
+            //error
+            perror("fork");
+            exit(1);
+        case 0: {
+            //child
+            if (execve(args[0], args, data) == -1){
+                perror("execve");
+                exit(EXIT_FAILURE);
+            }
+            break;
+        }
+        default:
+            //parent
+            int result;
+            if (waitpid(pid, &result, 0) == -1) {
+                perror("waitpid");
+                exit(1);
+            } else
+                cout << "Result: " << WEXITSTATUS(result) << '\n';
+            break;
+    }
 }
 
 int main(int argc, char *argv[]) {
-    char **env = environ;
-    while (*env) {
-        parseExport(*env);
-        env++;
-    }
+    for (char ** i = environ; *i; ++i)
+        parseExport(*i);
     size_t size = 256;
     char dir[size];
     getcwd(dir, size);
@@ -70,23 +84,29 @@ int main(int argc, char *argv[]) {
         if (request == "exit" || cin.eof()) return 0;
         stringstream ss(request);
         string command;
-        vector<string> commands;
+        vector<char *> commands;
+        vector <string> args;
         while (ss >> command)
-            commands.push_back(command);
+            args.push_back(command);
+        for (auto &i: args) {
+            char *tmp = new char[128];
+            strcpy(tmp, i.data());
+            commands.push_back(tmp);
+        }
+        commands.push_back(nullptr);
         if (commands.empty()) {
             getcwd(dir, size);
             cout << dir << ">> ";
-            continue;
         }
-        if (commands[0] == "export") {
+        if (strcmp(commands[0], "export") == 0) {
             switch (commands.size()) {
-                case 1:
+                case 2:
                     printExport();
                     break;
-                case 2:
+                case 3:
                     parseExport(commands[1]);
                     break;
-                case 3:
+                case 4:
                     addOneExport(commands[1], commands[2]);
                     break;
                 default:
@@ -95,11 +115,10 @@ int main(int argc, char *argv[]) {
             }
             getcwd(dir, size);
             cout << dir << ">> ";
-            continue;
         }
-        if (commands[0] == "unset") {
+        if (strcmp(commands[0], "unset") == 0) {
             switch (commands.size()) {
-                case 2:
+                case 3:
                     unset(commands[1]);
                     break;
                 default:
@@ -108,39 +127,20 @@ int main(int argc, char *argv[]) {
             }
             getcwd(dir, size);
             cout << dir << ">> ";
-            continue;
         }
-        pid_t pid;
-        switch (pid = fork()) {
-            case -1:
-                //error
-                perror("fork");
-                exit(1);
-            case 0: {
-                //child
-                vector<const char *> args(commands.size() + 1);
-                for (int i = 0; i < commands.size(); ++i)
-                    args[i] = commands[i].data();
-                args[commands.size()] = nullptr;
-                recount();
-                if (execve(args[0], const_cast<char *const *>(args.data()), envirmas) == -1) {
-                    perror("execve");
-                    exit(1);
-                }
-                break;
-            }
-            default:
-                //parent
-                int result;
-                if (waitpid(pid, &result, 0) == -1) {
-                    perror("waitpid");
-                    exit(1);
-                } else
-                    cout << "Result: " << WEXITSTATUS(result) << '\n';
-                break;
+        std::vector<char *> envir;
+        for (auto &i : env) {
+            std::string s = i.first + "=\"" + i.second + "\"";
+            char *tmp = new char[128];
+            strcpy(tmp, s.data());
+            envir.push_back(tmp);
         }
+        envir.push_back(nullptr);
+        processExecve(args.data(), envir.data());
+        envir.clear();
         getcwd(dir, size);
         cout << dir << ">> ";
+        args.clear();
     }
     return 0;
 }
