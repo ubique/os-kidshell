@@ -43,32 +43,6 @@ void unset(const string &str) {
     env.erase(str);
 }
 
-
-void processExecve(char **args, char **data) {
-    pid_t pid;
-    switch (pid = fork()) {
-        case -1:
-            //error
-            perror("fork");
-        case 0: {
-            //child
-            if (execve(args[0], args, data) == -1) {
-                perror("execve");
-                exit(EXIT_FAILURE);
-            }
-            break;
-        }
-        default:
-            //parent
-            int result;
-            if (waitpid(pid, &result, 0) == -1) {
-                perror("waitpid");
-            } else
-                cout << "Result: " << WEXITSTATUS(result) << '\n';
-            break;
-    }
-}
-
 int main(int argc, char *argv[]) {
     for (char **i = environ; *i; ++i)
         parseExport(*i);
@@ -133,7 +107,29 @@ int main(int argc, char *argv[]) {
             envir.push_back(tmp);
         }
         envir.push_back(nullptr);
-        processExecve(commands.data(), envir.data());
+        char ** arguments = commands.data();
+        pid_t pid;
+        switch (pid = fork()) {
+            case -1:
+                //error
+                perror("fork");
+            case 0: {
+                //child
+                if (execve(arguments[0], arguments, envir.data()) == -1) {
+                    perror("execve");
+                    exit(EXIT_FAILURE);
+                }
+                break;
+            }
+            default:
+                //parent
+                int result;
+                if (waitpid(pid, &result, 0) == -1) {
+                    perror("waitpid");
+                } else
+                    cout << "Result: " << WEXITSTATUS(result) << '\n';
+                break;
+        }
         envir.clear();
         commands.clear();
         getcwd(dir, size);
